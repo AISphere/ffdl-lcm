@@ -1,0 +1,67 @@
+package: github.com/AISphere/ffdl-lcm
+import:
+- package: github.com/AISphere/ffdl-trainer
+  repo: git@github.com:AISphere/ffdl-trainer.git
+  subpackages:
+  - client
+  - trainer/grpc_trainer_v2
+- package: github.com/AISphere/ffdl-commons
+  repo: git@github.com:AISphere/ffdl-commons.git
+- package: github.com/sirupsen/logrus
+  version: v1.0.5
+- package: github.com/alecthomas/units
+- package: github.com/cenkalti/backoff
+- package: github.com/ventu-io/go-shortid
+- package: github.com/spf13/viper
+- package: golang.org/x/net
+  subpackages:
+  - context
+- package: github.com/aws/aws-sdk-go
+  version: v1.14.9
+  subpackages:
+  - aws
+  - aws/awserr
+  - aws/credentials
+  - aws/session
+  - service/s3
+  - service/s3/s3manager
+- package: google.golang.org/grpc
+  version: v1.14.0
+  subpackages:
+  - credentials
+  - grpclog
+  - health
+  - health/grpc_health_v1
+  - metadata
+- package: github.com/go-openapi/spec
+- package: k8s.io/kube-openapi
+- package: k8s.io/client-go
+  version: v6.0.0
+- package: github.com/emicklei/go-restful
+  subpackages:
+  - swagger
+- package: github.com/coreos/etcd
+  version: v3.3.3
+  subpackages:
+  - clientv3
+- package: github.com/go-kit/kit
+  version: v0.7.0
+  subpackages:
+  - metrics
+- package: github.com/prometheus/client_golang
+  version: v0.8.0
+  subpackages:
+  - prometheus
+- package: github.com/sony/gobreaker
+- package: golang.org/x/crypto
+- package: github.com/go-logfmt/logfmt
+  version: v0.3.0
+- package: gopkg.in/yaml.v2
+testImport:
+- package: github.com/stretchr/testify
+  version: v1.2.2
+  subpackages:
+  - assert
+- package: github.com/golang/mock
+  subpackages:
+  - gomock
