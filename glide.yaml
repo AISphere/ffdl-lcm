@@ -1,12 +1,12 @@
 package: github.com/AISphere/ffdl-lcm
 import:
 - package: github.com/AISphere/ffdl-trainer
-  repo: git@github.com:AISphere/ffdl-trainer.git
+  repo: https://github.com/AISphere/ffdl-trainer.git
   subpackages:
   - client
   - trainer/grpc_trainer_v2
 - package: github.com/AISphere/ffdl-commons
-  repo: git@github.com:AISphere/ffdl-commons.git
+  repo: https://github.com/AISphere/ffdl-commons.git
 - package: github.com/sirupsen/logrus
   version: v1.0.5
 - package: github.com/alecthomas/units

@@ -123,3 +123,20 @@ BUILD_DIR=build
 
 THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
+usage:              ## Show this help
+	@fgrep -h " ## " $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
+
+protoc-trainer-client:
+	wget https://raw.githubusercontent.com/AISphere/ffdl-trainer/master/trainer/grpc_trainer_v2/trainer.proto -P vendor/github.com/AISphere/ffdl-trainer/trainer/grpc_trainer_v2/trainer.proto
+	cd vendor/github.com/AISphere/ffdl-trainer; \
+	protoc -I./trainer/grpc_trainer_v2 --go_out=plugins=grpc:trainer/grpc_trainer_v2 ./trainer/grpc_trainer_v2/trainer.proto
+	@# At the time of writing, protoc does not support custom tags, hence use a little regex to add "bson:..." tags
+	@# See: https://github.com/golang/protobuf/issues/52
+	cd vendor/github.com/AISphere/ffdl-trainer; \
+	sed -i .bak '/.*bson:.*/! s/json:"\([^"]*\)"/json:"\1" bson:"\1"/' ./trainer/grpc_trainer_v2/trainer.pb.go
+
+vet:
+	go vet $(shell glide nv)
+
+lint:               ## Run the code linter
+	go list ./... | grep -v /vendor/ | grep -v /grpc_trainer_v2 | xargs -L1 golint -set_exit_status
