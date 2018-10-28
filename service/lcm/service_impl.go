@@ -28,7 +28,7 @@ import (
 	"github.com/AISphere/ffdl-commons/service"
 	"github.com/AISphere/ffdl-lcm/coord"
 	"github.com/AISphere/ffdl-lcm/lcmconfig"
-	"github.com/AISphere/ffdl-trainer/client"
+	client "github.com/AISphere/ffdl-lcm/trainer-client"
 	"github.com/AISphere/ffdl-trainer/trainer/grpc_trainer_v2"
 
 	"github.com/cenkalti/backoff"

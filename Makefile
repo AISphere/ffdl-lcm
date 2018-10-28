@@ -123,11 +123,13 @@ BUILD_DIR=build
 
 THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
+TRAINER_VERSION ?= 257f80f6a32b70279afd780b1669661f0f85211b
+
 usage:              ## Show this help
 	@fgrep -h " ## " $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
 
 protoc-trainer-client:
-	wget https://raw.githubusercontent.com/AISphere/ffdl-trainer/master/trainer/grpc_trainer_v2/trainer.proto -P vendor/github.com/AISphere/ffdl-trainer/trainer/grpc_trainer_v2/trainer.proto
+	wget https://raw.githubusercontent.com/AISphere/ffdl-trainer/$(TRAINER_VERSION)/trainer/grpc_trainer_v2/trainer.proto -P vendor/github.com/AISphere/ffdl-trainer/trainer/grpc_trainer_v2
 	cd vendor/github.com/AISphere/ffdl-trainer; \
 	protoc -I./trainer/grpc_trainer_v2 --go_out=plugins=grpc:trainer/grpc_trainer_v2 ./trainer/grpc_trainer_v2/trainer.proto
 	@# At the time of writing, protoc does not support custom tags, hence use a little regex to add "bson:..." tags
@@ -140,3 +142,11 @@ vet:
 
 lint:               ## Run the code linter
 	go list ./... | grep -v /vendor/ | grep -v /grpc_trainer_v2 | xargs -L1 golint -set_exit_status
+
+glide:               ## Run full glide rebuild
+	glide cache-clear; \
+	rm -rf vendor; \
+	glide install
+
+build-x86-64-lcm:
+	(CGO_ENABLED=0 GOOS=linux go build -ldflags "-s" -a -installsuffix cgo -o bin/main)

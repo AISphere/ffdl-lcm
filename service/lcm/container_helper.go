@@ -465,7 +465,7 @@ func constructLearnerContainer(req *service.JobDeploymentRequest, envVars []v1co
 	}
 
 	learnerContainer := learner.CreateContainerSpec(container)
-	extendLearnerContainer(&learnerContainer, req)
+	extendLearnerContainer(&learnerContainer, req, logr)
 	return learnerContainer
 }
 
