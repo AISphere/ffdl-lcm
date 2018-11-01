@@ -17,6 +17,7 @@
 package lcm
 
 import (
+	"github.com/spf13/viper"
 	//"errors"
 	"strconv"
 	"time"
@@ -29,6 +30,10 @@ import (
 	"github.com/AISphere/ffdl-commons/logger"
 	"github.com/AISphere/ffdl-commons/service"
 	"github.com/AISphere/ffdl-trainer/trainer/grpc_trainer_v2"
+)
+
+const (
+	devicePlugin               = "device_plugin"
 )
 
 func (s *lcmService) currentResourceSnapshot(jdreq *service.JobDeploymentRequest, numLearners int, logr *logger.LocLoggingEntry) bool {
@@ -147,7 +152,7 @@ func getResources(s *lcmService, logr *logger.LocLoggingEntry) (bool, *allocatab
 
 	// Define GPU resource as device plugin or accelerator
 	var resourceGPU v1core.ResourceName = "nvidia.com/gpu"
-	if !config.GetDevicePlugin() {
+	if !GetDevicePlugin() {
 		resourceGPU = v1core.ResourceNvidiaGPU
 	}
 
@@ -210,4 +215,11 @@ func getResources(s *lcmService, logr *logger.LocLoggingEntry) (bool, *allocatab
 
 	return k8sConnected, alloc, rreq, avl
 
+}
+
+func GetDevicePlugin() bool {
+	if viper.IsSet(devicePlugin) {
+		return viper.GetBool(devicePlugin)
+	}
+	return true
 }

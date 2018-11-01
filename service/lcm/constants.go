@@ -52,11 +52,32 @@ const (
 
 const (
 	psPort             int32  = 50051
-	caffeFrameworkName string = "caffe"
-	tfFrameworkName    string = "tensorflow"
-	torchFrameworkName string = "torch"
+	//caffeFrameworkName string = "caffe"
+	//tfFrameworkName    string = "tensorflow"
+	//torchFrameworkName string = "torch"
+
+	caffeFrameworkName           string = "caffe"
+	tfFrameworkName              string = "tensorflow"
+	torchFrameworkName           string = "torch"
+	caffe2FrameworkName          string = "caffe2"
+	pytorchFrameworkName         string = "pytorch"
+	customFrameworkName          string = "custom"
+	h2o3FrameworkName            string = "h2o3"
+	horovodFrameworkName         string = "horovod"
+	pytorchMPIFrameworkName      string = "pytorchmpi"
+
 	numRetries                = 5
 	maxGPUsPerNode            = 4
+
+	// Not sure if these should stay or go, -sb 3/15/2018
+	errCodeNormal                       = "000"
+	errCodeInsufficientResources        = "100"
+	errCodeFailedDeploy                 = "101"
+	errCodeFailedPS                     = "102" // TODO: unused?
+	errCodeImagePull                    = "103"
+	errFailedPodReasonUnknown           = "104"
+	errCodeK8SConnection                = "200"
+	errCodeEtcdConnection               = "201"
 )
 
 const (

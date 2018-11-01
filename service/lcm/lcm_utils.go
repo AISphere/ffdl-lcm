@@ -34,7 +34,7 @@ import (
 	"github.com/AISphere/ffdl-commons/util"
 	"github.com/AISphere/ffdl-lcm/coord"
 
-	"github.com/AISphere/ffdl-trainer/client"
+	client "github.com/AISphere/ffdl-lcm/trainer-client"
 	"github.com/AISphere/ffdl-trainer/trainer/grpc_trainer_v2"
 	"golang.org/x/net/context"
 
