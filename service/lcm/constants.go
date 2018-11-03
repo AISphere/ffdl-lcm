@@ -83,16 +83,16 @@ const (
 const (
 	//Total CPU for helpers = 2.5
 	//Total RAM for helpers = 4 GB
-	storeResultsMilliCPU=20
-	storeResultsMemInMB=100
-	loadModelMilliCPU=20
-	loadModelMemInMB=50
-	loadTrainingDataMilliCPU=20
-	loadTrainingDataMemInMB=100
-	logCollectorMilliCPU=20
-	logCollectorMemInMB=100
-	controllerMilliCPU=20
-	controllerMemInMB=100
+	storeResultsMilliCPU=100
+	storeResultsMemInMB=500
+	loadModelMilliCPU=100
+	loadModelMemInMB=500
+	loadTrainingDataMilliCPU=100
+	loadTrainingDataMemInMB=500
+	logCollectorMilliCPU=100
+	logCollectorMemInMB=500
+	controllerMilliCPU=100
+	controllerMemInMB=500
 )
 
 const (
