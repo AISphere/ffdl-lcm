@@ -22,6 +22,7 @@ import (
 	"path"
 	"strings"
 	"text/template"
+	"os"
 
 	"github.com/AISphere/ffdl-commons/config"
 	"github.com/AISphere/ffdl-commons/service"
@@ -209,11 +210,11 @@ func fetchImageNameFromEvaluationMetrics(evalMetricsString string,
 }
 
 func findTrainingDataServiceTag(k8sClient kubernetes.Interface, logr *logger.LocLoggingEntry) string {
-	selector := "service==ffdl-trainingdata"
+	selector := "service==" + os.Getenv("DATA_SERVICE_NAME")
 	podInterface := k8sClient.Core().Pods(config.GetPodNamespace())
 	pods, err := podInterface.List(metav1.ListOptions{LabelSelector: selector})
 	if err != nil {
-		logr.WithError(err).Debugf("Could not find service=ffdl-trainingdata")
+		logr.WithError(err).Debugf("Could not find service=%s", os.Getenv("DATA_SERVICE_NAME"))
 		// bad fallback, ideally should never happen
 		return logCollectorBadTagNoTDSFound
 	}
@@ -465,7 +466,7 @@ func constructLearnerContainer(req *service.JobDeploymentRequest, envVars []v1co
 	}
 
 	learnerContainer := learner.CreateContainerSpec(container)
-	extendLearnerContainer(&learnerContainer, req, logr)
+	//extendLearnerContainer(&learnerContainer, req, logr)
 	return learnerContainer
 }
 
