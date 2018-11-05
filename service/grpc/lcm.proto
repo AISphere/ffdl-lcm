@@ -1,0 +1,114 @@
+/*
+ * Copyright 2017-2018 IBM Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+syntax = "proto3";
+
+package service;
+
+service LifecycleManager {
+  rpc DeployTrainingJob (JobDeploymentRequest) returns (JobDeploymentResponse) {}
+  rpc KillTrainingJob (JobKillRequest) returns (JobKillResponse) {}
+  rpc HaltTrainingJob (JobHaltRequest) returns (JobHaltResponse) {}
+}
+
+
+message ResourceRequirements {
+  double cpus = 1;
+  double gpus = 2;
+  double memory = 3;
+  MemoryUnit memory_unit = 4;
+  int32 learners = 5;
+  string schedpolicy = 6;
+  string topology = 7;
+  string architecture = 8;
+  double storage = 9;
+  MemoryUnit storage_unit = 10;
+  string gpu_type = 11;
+
+  // TODO add more fields as required
+
+  enum MemoryUnit {
+    MB = 0;
+    MiB = 1;
+    GB = 2;
+    GiB = 3;
+    TB = 4;
+    TiB = 5;
+  }
+}
+
+message User {
+  string id = 1;
+  repeated string roles = 2;
+  string firstname = 3;
+  string lastname = 4;
+  string email = 5;
+}
+
+enum StatusMessages {
+  NORMAL_OPERATION = 0;
+  INTERNAL_ERROR = 10;
+  INSUFFICIENT_RESOURCES = 20;
+}
+
+
+
+message JobDeploymentRequest {
+  string name = 1;
+  service.ResourceRequirements resources = 4;
+  map<string, string> env_vars = 5;
+  map<string, string> labels = 6;
+  string user_id = 7;
+  string training_id = 8;
+  string framework = 9;
+  string version =10;
+  string evaluation_metrics_spec = 11;
+  string image_tag = 12;
+  ImageLocation image_location = 13; // Optional: non-standard location for learner image
+}
+
+message ImageLocation {
+    string registry = 1; // the server name for the docker registry
+    string namespace = 2; // namespace within the registry
+    string access_token = 3; // Token used to access images stored in the registry+namespace
+    string email = 4; // Email address associated with the account
+}
+
+message JobDeploymentResponse {
+  string name = 1;
+  string status = 2; // TODO remove
+}
+
+message JobKillRequest {
+  string name = 1;
+  string training_id = 2;
+  string user_id = 3;
+}
+
+message JobKillResponse {
+  // placeholder for further messages
+}
+
+message JobHaltRequest {
+  string name = 1;
+  string training_id = 2;
+  string user_id = 3;
+}
+
+message JobHaltResponse {
+  // placeholder for further messages
+}
