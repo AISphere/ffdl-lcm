@@ -183,12 +183,6 @@ imports:
   - service
   - service/client
   - util
-- name: github.com/AISphere/ffdl-trainer
-  version: master
-  repo: https://github.com/AISphere/ffdl-trainer.git
-  subpackages:
-  - client
-  - trainer/grpc_trainer_v2
 - name: golang.org/x/crypto
   version: 81e90905daefcd6fd217b62423c0908922eadb30
   subpackages:
