@@ -17,7 +17,7 @@
 package lcm
 
 import (
-	"github.com/AISphere/ffdl-commons/service"
+	"github.com/AISphere/ffdl-lcm/service/grpc"
 	"github.com/spf13/viper"
 
 	v1core "k8s.io/api/core/v1"

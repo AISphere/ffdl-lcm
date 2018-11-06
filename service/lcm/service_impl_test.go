@@ -23,7 +23,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/AISphere/ffdl-commons/config"
 
-	"github.com/AISphere/ffdl-commons/service"
+	"github.com/AISphere/ffdl-lcm/service/grpc"
 	// "github.com/coreos/etcd/clientv3"
 	// "github.com/AISphere/ffdl-lcm/coord"
 )

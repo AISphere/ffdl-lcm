@@ -25,7 +25,7 @@ import (
 	"github.com/AISphere/ffdl-commons/config"
 	"github.com/AISphere/ffdl-commons/logger"
 	"github.com/AISphere/ffdl-commons/metricsmon"
-	"github.com/AISphere/ffdl-commons/service"
+	"github.com/AISphere/ffdl-lcm/service/grpc"
 	"github.com/AISphere/ffdl-lcm/coord"
 	"github.com/AISphere/ffdl-lcm/lcmconfig"
 	client "github.com/AISphere/ffdl-lcm/trainer-client"

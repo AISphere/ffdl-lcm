@@ -24,7 +24,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/AISphere/ffdl-commons/config"
-	"github.com/AISphere/ffdl-commons/service"
+	"github.com/AISphere/ffdl-lcm/service/grpc"
 	"github.com/AISphere/ffdl-commons/util"
 	"google.golang.org/grpc"
 )

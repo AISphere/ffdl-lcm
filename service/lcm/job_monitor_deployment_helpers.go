@@ -24,7 +24,7 @@ import (
 	"github.com/AISphere/ffdl-lcm/lcmconfig"
 
 	"github.com/AISphere/ffdl-commons/logger"
-	"github.com/AISphere/ffdl-commons/service"
+	"github.com/AISphere/ffdl-lcm/service/grpc"
 
 	"github.com/spf13/viper"
 	v1beta1 "k8s.io/api/apps/v1beta1"
