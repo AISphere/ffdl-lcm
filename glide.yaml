@@ -11,6 +11,7 @@ import:
   - logger
   - metricsmon
   - util
+  - grpc-health-checker
 - package: github.com/cenkalti/backoff
   version: ^2.0.0
 - package: github.com/coreos/etcd
@@ -33,6 +34,10 @@ import:
   version: ^1.2.0
 - package: github.com/sirupsen/logrus
   version: v1.1.1
+- package: github.com/spf13/cobra
+  version: ^0.0.3
+  subpackages:
+  - cobra/cobra
 - package: github.com/spf13/viper
   version: ^1.2.1
 - package: golang.org/x/net

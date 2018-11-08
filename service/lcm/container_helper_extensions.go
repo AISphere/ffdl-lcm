@@ -17,7 +17,7 @@
 package lcm
 
 import (
-	"github.com/AISphere/ffdl-lcm/service/grpc"
+	"github.com/AISphere/ffdl-lcm/service/grpc_training_data_v1"
 	"github.com/spf13/viper"
 
 	v1core "k8s.io/api/core/v1"

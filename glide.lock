@@ -1,18 +1,20 @@
-hash: 496bc49e3427fa8f3c03eb81d8a3e49188c37fef71ffcd3a26bcfcb39848568e
-updated: 2018-11-05T15:04:41.055463-05:00
+hash: 21fcfad27cf3f27c9644d2b97ed5b7fc4469bbd3be697f20eaf6ec3f959b5c11
+updated: 2018-11-07T16:26:45.546591-05:00
 imports:
 - name: github.com/AISphere/ffdl-commons
-  version: a237bc1112a9c37c92080511cf3e333113006606
+  version: f68348e6d29405a5aefb154c8fe42902a59b6b29
+  repo: https://github.com/sboagibm/ffdl-commons.git
   subpackages:
   - config
   - framework
+  - grpc-health-checker
   - logger
   - metricsmon
   - util
 - name: github.com/alecthomas/units
   version: 2efee857e7cfd4f3d0138cc3cbb1b4966962b93a
 - name: github.com/beorn7/perks
-  version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
+  version: 3a771d992973f24aa725d07868b467d1ddfceafb
   subpackages:
   - quantile
 - name: github.com/cenkalti/backoff
@@ -35,7 +37,7 @@ imports:
   subpackages:
   - log
 - name: github.com/fsnotify/fsnotify
-  version: 4da3e2cfbabc9f751898f250b49f2439785783a1
+  version: ccc981bf80385c528a65fbfdd49bf2d8da22aa23
 - name: github.com/ghodss/yaml
   version: 0ca9ea5df5451ffdf184b4428c902747c2c11cd7
 - name: github.com/go-kit/kit
@@ -59,7 +61,7 @@ imports:
 - name: github.com/go-openapi/swag
   version: f3f9494671f93fcff853e3c6e9e948b3eb71e590
 - name: github.com/go-stack/stack
-  version: 817915b46b97fd7bb80e8ab6b69f01a53ac3eebf
+  version: 2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a
 - name: github.com/gogo/protobuf
   version: 342cbe0a04158f6dcb03ca0079991a51a4248c02
   subpackages:
@@ -94,7 +96,7 @@ imports:
 - name: github.com/grpc-ecosystem/go-grpc-prometheus
   version: c225b8c3b01faf2899099b768856a9e916e5087b
 - name: github.com/hashicorp/hcl
-  version: 42e33e2d55a0ff1d6263f738896ea8c13571a8d0
+  version: 65a6292f0157eff210d03ed1bf6c59b190b8b906
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -114,7 +116,7 @@ imports:
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/magiconair/properties
-  version: 8d7837e64d3c1ee4e54a880c5a920ab4316fc90a
+  version: c2353362d570a7bfa228149c62842019201cfb71
 - name: github.com/mailru/easyjson
   version: 2f5df55504ebc322e4d52d34df6a1f5b503bf26d
   subpackages:
@@ -126,15 +128,16 @@ imports:
   subpackages:
   - pbutil
 - name: github.com/mitchellh/mapstructure
-  version: d0303fe809921458f417bcf828397a65db30a7e4
+  version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
 - name: github.com/pelletier/go-toml
-  version: 2009e44b6f182e34d8ce081ac2767622937ea3d4
+  version: 81a861c69d25a841d0c4394f0e6f84bc8c5afae0
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/prometheus/client_golang
-  version: 5cec1d0429b02e4323e042eb04dafdb079ddf568
+  version: abad2d1bd44235a26707c172eab6bca5bf2dbad3
   subpackages:
   - prometheus
+  - prometheus/internal
   - prometheus/push
 - name: github.com/prometheus/client_model
   version: 6f3806018612930941127f2a7c6c453ba2c527d2
@@ -155,19 +158,23 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/sirupsen/logrus
-  version: bcd833dfe83d3cebad139e4a29ed79cb2318bf95
+  version: ad15b42461921f1fb3529b058c6786c6a45d5162
 - name: github.com/sony/gobreaker
   version: b2a34562d02c4d5fd6645399c69e00141fb24e5a
 - name: github.com/spf13/afero
-  version: e67d870304c4bca21331b02f414f970df13aa694
+  version: d40851caa0d747393da1ffb28f7f9d8b4eeffebd
   subpackages:
   - mem
 - name: github.com/spf13/cast
   version: 8c9545af88b134710ab1cd196795e7f2388358d7
+- name: github.com/spf13/cobra
+  version: ef82de70bb3f60c65fb8eebacbb2d122ef517385
+  subpackages:
+  - cobra/cobra
 - name: github.com/spf13/jwalterweatherman
-  version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
+  version: 94f6ae3ed3bceceafa716478c5fbf8d29ca601a1
 - name: github.com/spf13/pflag
-  version: 298182f68c66c05229eb03ac171abe6e309ee79a
+  version: 454a7fbb95f91e2b48adee781b0b02496988da92
 - name: github.com/spf13/viper
   version: 2c12c60302a5a0e62ee102ca9bc996277c2f64f5
 - name: github.com/stretchr/testify
@@ -175,7 +182,7 @@ imports:
   subpackages:
   - assert
 - name: golang.org/x/crypto
-  version: 81e90905daefcd6fd217b62423c0908922eadb30
+  version: e4dc69e5b2fd71dcaf8bd5d054eb936deb78d1fa
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net

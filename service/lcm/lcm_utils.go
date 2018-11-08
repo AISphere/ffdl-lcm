@@ -30,7 +30,7 @@ import (
 	"github.com/AISphere/ffdl-commons/config"
 
 	"github.com/AISphere/ffdl-commons/logger"
-	"github.com/AISphere/ffdl-lcm/service/grpc"
+	"github.com/AISphere/ffdl-lcm/service/grpc_training_data_v1"
 	"github.com/AISphere/ffdl-commons/util"
 	"github.com/AISphere/ffdl-lcm/coord"
 

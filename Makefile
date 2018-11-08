@@ -18,143 +18,33 @@
 # Build and deploy file for the ffdl-lcm service
 #
 
-# NOTE: should this variables section be is ffdl-commons and included in respective service makefiles?
+DOCKER_IMG_NAME = lifecycle-manager-service
 
-# The ip or hostname of the Docker host.
-# Note the awkward name is to avoid clashing with the DOCKER_HOST variable.
-DOCKERHOST_HOST ?= localhost
+#####################################################
+# Dynamically get the commons makefile for shared
+# variables and targets.
+#####################################################
+CM_REPO ?= raw.githubusercontent.com/ffdl-commons
+CM_VERSION ?= master
+CM_MK_LOC ?= .
+CM_MK_NM ?= "ffdl-commons.mk"
 
-ifeq ($(DOCKERHOST_HOST),localhost)
- # Check if minikube is active, otherwise leave it as 'localhost'
- MINIKUBE_IP := $(shell minikube ip 2>/dev/null)
- ifdef MINIKUBE_IP
-  DOCKERHOST_HOST := $(MINIKUBE_IP)
- endif
-endif
+# If the .mk file is changed on commons, and the file already exists here, it seems to update, but might take a while.
+# Delete the file and try again to make sure, if you are having trouble.
+CM_MK=$(shell wget -N https://${CM_REPO}/${CM_VERSION}/${CM_MK_NM} -P ${CM_MK_LOC} > /dev/null 2>&1 && echo "${CM_MK_NM}")
 
-FSWATCH := $(shell which fswatch 2>/dev/null)
+include $(CM_MK)
 
-WHOAMI ?= $(shell whoami)
+## show variable used in commons .mk include mechanism
+show_cm_vars:
+	@echo CM_REPO=$(CM_REPO)
+	@echo CM_VERSION=$(CM_VERSION)
+	@echo CM_MK_LOC=$(CM_MK_LOC)
+	@echo CM_MK_NM=$(CM_MK_NM)
 
-DOCKER_BX_NS ?= registry.ng.bluemix.net/dlaas_dev
-DOCKER_BASE_IMG_NAME=dlaas-service-base
-DOCKER_BASE_IMG_TAG=ubuntu16.04
-SWAGGER_FILE=api/swagger/swagger.yml
+#####################################################
 
-DOCKER_IMG_NAME=lifecycle-manager-service
-
-KUBE_CURRENT_CONTEXT ?= $(shell kubectl config current-context)
-
-# The environment where DLaaS is deployed.
-# This affects a number of other variables below.
-ifeq ($(KUBE_CURRENT_CONTEXT), minikube)
- # Automatically set to local if Kubernetes context is "minikube"
- DLAAS_ENV ?= local
- DLAAS_LCM_DEPLOYMENT ?= hybrid
-else
- DLAAS_ENV ?= development
- DLAAS_LCM_DEPLOYMENT ?= development
-endif
-
-# Support two different Kuberentes clusters:
-# - one to deploy the DLaaS microservices
-# - one to deploy the learners and parameter servers.
-DLAAS_SERVICES_KUBE_CONTEXT ?= $(KUBE_CURRENT_CONTEXT)
-DLAAS_LEARNER_KUBE_CONTEXT ?= $(KUBE_CURRENT_CONTEXT)
-
-# For non-local deployments, Kubernetes namespace
-ifeq ($(DLAAS_ENV), local)
- export INVENTORY ?= ansible/envs/local/minikube.ini
- DLAAS_IMAGE_PULL_POLICY ?= IfNotPresent   # needed ?
- LCM_SERVICE_CPU_REQ ?= 100m               # needed ?
- LCM_SERVICE_MEMORY_REQ ?= 64Mi            # needed ?
-else
- INVENTORY ?= ansible/envs/local/hybrid.ini
- DLAAS_IMAGE_PULL_POLICY ?= Always         # needed ?
- LCM_SERVICE_CPU_REQ ?= "1"                # needed ?
- LCM_SERVICE_MEMORY_REQ ?= 512Mi           # needed ?
-endif
-
-DLAAS_SERVICES_KUBE_NAMESPACE ?= $(shell env DLAAS_KUBE_CONTEXT=$(DLAAS_SERVICES_KUBE_CONTEXT) ./bin/kubecontext.sh namespace)
-DLAAS_LEARNER_KUBE_NAMESPACE ?= $(shell env DLAAS_KUBE_CONTEXT=$(DLAAS_LEARNER_KUBE_CONTEXT) ./bin/kubecontext.sh namespace)
-DLAAS_LEARNER_KUBE_URL ?= $(shell env DLAAS_KUBE_CONTEXT=$(DLAAS_LEARNER_KUBE_CONTEXT) ./bin/kubecontext.sh api-server)
-DLAAS_LEARNER_KUBE_CAFILE ?= $(shell env DLAAS_KUBE_CONTEXT=$(DLAAS_LEARNER_KUBE_CONTEXT) ./bin/kubecontext.sh server-certificate)
-DLAAS_LEARNER_KUBE_TOKEN ?= $(shell env DLAAS_KUBE_CONTEXT=$(DLAAS_LEARNER_KUBE_CONTEXT) ./bin/kubecontext.sh user-token)
-DLAAS_LEARNER_KUBE_KEYFILE ?= $(shell env DLAAS_KUBE_CONTEXT=$(DLAAS_LEARNER_KUBE_CONTEXT) ./bin/kubecontext.sh client-key)
-DLAAS_LEARNER_KUBE_CERTFILE ?= $(shell env DLAAS_KUBE_CONTEXT=$(DLAAS_LEARNER_KUBE_CONTEXT) ./bin/kubecontext.sh client-certificate)
-DLAAS_LEARNER_KUBE_SECRET ?= kubecontext-$(DLAAS_LEARNER_KUBE_CONTEXT)
-
-
-KUBE_SERVICES_CONTEXT_ARGS = --context $(DLAAS_SERVICES_KUBE_CONTEXT) --namespace $(DLAAS_SERVICES_KUBE_NAMESPACE)
-KUBE_LEARNER_CONTEXT_ARGS = --context $(DLAAS_LEARNER_KUBE_CONTEXT) --namespace $(DLAAS_LEARNER_KUBE_NAMESPACE)
-
-# Use non-conflicting image tag, and Eureka name.
-DLAAS_IMAGE_TAG ?= user-$(WHOAMI)
-DLAAS_EUREKA_NAME ?= $(shell echo DLAAS-USER-$(WHOAMI) | tr '[:lower:]' '[:upper:]')
-
-DLAAS_LEARNER_TAG?=dev_v8
-
-# The target host for the e2e test.
-#DLAAS_HOST?=localhost:30001
-DLAAS_HOST?=$(shell env DLAAS_KUBE_CONTEXT=$(DLAAS_SERVICES_KUBE_CONTEXT) ./bin/kubecontext.sh restapi-url)
-
-# The target host for the grpc cli.
-DLAAS_GRPC?=$(shell env DLAAS_KUBE_CONTEXT=$(DLAAS_SERVICES_KUBE_CONTEXT) ./bin/kubecontext.sh trainer-url)
-
-LEARNER_DEPLOYMENT_ARGS = DLAAS_LEARNER_KUBE_URL=$(DLAAS_LEARNER_KUBE_URL) \
-                          DLAAS_LEARNER_KUBE_TOKEN=$(DLAAS_LEARNER_KUBE_TOKEN) \
-                          DLAAS_LEARNER_KUBE_KEYFILE=$(DLAAS_LEARNER_KUBE_KEYFILE) \
-                          DLAAS_LEARNER_KUBE_CERTFILE=$(DLAAS_LEARNER_KUBE_CERTFILE) \
-                          DLAAS_LEARNER_KUBE_CAFILE=$(DLAAS_LEARNER_KUBE_CAFILE) \
-                          DLAAS_LEARNER_KUBE_NAMESPACE=$(DLAAS_LEARNER_KUBE_NAMESPACE) \
-                          DLAAS_LEARNER_KUBE_SECRET=$(DLAAS_LEARNER_KUBE_SECRET)
-DEPLOYMENT_ARGS = DLAAS_ENV=$(DLAAS_ENV) $(LEARNER_DEPLOYMENT_ARGS) \
-                  DLAAS_LCM_DEPLOYMENT=$(DLAAS_LCM_DEPLOYMENT) \
-                  DLAAS_IMAGE_TAG=$(DLAAS_IMAGE_TAG) \
-                  DLAAS_LEARNER_TAG=$(DLAAS_LEARNER_TAG) \
-                  DLAAS_IMAGE_PULL_POLICY=$(DLAAS_IMAGE_PULL_POLICY) \
-                  LCM_SERVICE_CPU_REQ=$(LCM_SERVICE_CPU_REQ) \
-                  LCM_SERVICE_MEMORY_REQ=$(LCM_SERVICE_MEMORY_REQ) \
-                  DLAAS_ETCD_ADDRESS=$(DLAAS_ETCD_ADDRESS) \
-				  DLAAS_ETCD_PREFIX=$(DLAAS_ETCD_PREFIX) \
-				  DLAAS_ETCD_USERNAME=$(DLAAS_ETCD_USERNAME) \
-				  DLAAS_ETCD_PASSWORD=$(DLAAS_ETCD_PASSWORD) \
-				  DLAAS_MOUNTCOS_GB_CACHE_PER_GPU=$(DLAAS_MOUNTCOS_GB_CACHE_PER_GPU)
-
-BUILD_DIR=build
-
-THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-
-usage:              ## Show this help
-	@fgrep -h " ## " $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
-
-TRAINER_REPO ?= raw.githubusercontent.com/sboagibm/ffdl-trainer
-TRAINER_VERSION ?= proto-only-depend
-TRAINER_LOCATION ?= vendor/github.com/AISphere/ffdl-trainer
-TRAINER_SUBDIR ?= trainer/grpc_trainer_v2
-TRAINER_SUBDIR_IN ?= trainer/grpc_trainer_v2
-TRAINER_FNAME ?= trainer
-
-protoc-trainer:  ## Make the trainer protoc client, depends on `make glide` being run first
-	#	rm -rf $(TRAINER_LOCATION)/$(TRAINER_SUBDIR)
-	wget https://$(TRAINER_REPO)/$(TRAINER_VERSION)/$(TRAINER_SUBDIR_IN)/$(TRAINER_FNAME).proto -P $(TRAINER_LOCATION)/$(TRAINER_SUBDIR)
-	cd ./$(TRAINER_LOCATION); \
-	protoc -I./$(TRAINER_SUBDIR) --go_out=plugins=grpc:$(TRAINER_SUBDIR) ./$(TRAINER_SUBDIR)/$(TRAINER_FNAME).proto
-	@# At the time of writing, protoc does not support custom tags, hence use a little regex to add "bson:..." tags
-	@# See: https://github.com/golang/protobuf/issues/52
-	cd $(TRAINER_LOCATION); \
-	sed -i .bak '/.*bson:.*/! s/json:"\([^"]*\)"/json:"\1" bson:"\1"/' ./$(TRAINER_SUBDIR)/$(TRAINER_FNAME).pb.go
-
-vet:
-	go vet $(shell glide nv)
-
-lint:               ## Run the code linter
-	go list ./... | grep -v /vendor/ | grep -v /grpc_trainer_v2 | xargs -L1 golint -set_exit_status
-
-glide:               ## Run full glide rebuild
-	glide cache-clear; \
-	rm -rf vendor; \
-	glide install
+protoc: protoc-trainer
 
 #####################################################
 ## Extra helpers for the LCM, but which are deployed
@@ -172,7 +62,6 @@ docker-build-lcm-helpers: docker-build-controller
 docker-push-lcm-helpers: docker-push-controller
 
 build-x86-64-lcm:
-	cd vendor/github.com/AISphere/ffdl-commons/grpc-health-checker && make install-deps build-x86-64
 	(CGO_ENABLED=0 GOOS=linux go build -ldflags "-s" -a -installsuffix cgo -o bin/main)
 
 build-x86-64-jobmonitor:
@@ -180,9 +69,7 @@ build-x86-64-jobmonitor:
 
 build-x86-64: build-x86-64-lcm build-x86-64-jobmonitor docker-build-lcm-helpers
 
-docker-build-lcm: build-x86-64
-	cd vendor/github.com/AISphere/ffdl-commons/grpc-health-checker && make install-deps build-x86-64
-	(docker build --label git-commit=$(shell git rev-list -1 HEAD) -t "$(DOCKER_BX_NS)/$(DOCKER_IMG_NAME):$(DLAAS_IMAGE_TAG)" .)
+docker-build-lcm: build-x86-64-lcm
 
 docker-build:       ## Build the Docker image
 docker-build: docker-build-lcm build-x86-64-jobmonitor
@@ -198,15 +85,6 @@ docker-push-lcm: docker-push-lcm-only docker-push-lcm-helpers
 docker-push-jobmonitor:
 	docker push "$(DOCKER_BX_NS)/jobmonitor:$(DLAAS_IMAGE_TAG)"
 
-
-# Define environment variables for unit and integration testing
-DLAAS_MONGO_PORT ?= 27017
-
-#these credentials should be the same as what are present in lcm-secrets
-DLAAS_ETCD_ADDRESS=https://watson-dev3-dal10-10.compose.direct:15232,https://watson-dev3-dal10-9.compose.direct:15232
-DLAAS_ETCD_USERNAME=root
-DLAAS_ETCD_PASSWORD=RHDACXYDLMIXXPEE
-DLAAS_ETCD_PREFIX=/dlaas/jobs/local_hybrid/
 
 test-start-deps:   ## Start test dependencies
 	docker run -d -p $(DLAAS_MONGO_PORT):27017 --name mongo mongo:3.0
