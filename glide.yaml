@@ -57,7 +57,10 @@ import:
   subpackages:
   - apps/v1beta1
   - core/v1
+- package: github.com/json-iterator/go
+  version: f2b4162afba35581b6d4a50d3b8f34e33c144682
 - package: k8s.io/apimachinery
+  version: fb40df2b502912cbe3a93aa61c2b2487f39cb42f
   subpackages:
   - pkg/api/errors
   - pkg/api/resource
