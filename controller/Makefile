@@ -14,25 +14,38 @@
 # limitations under the License.
 #
 
+DOCKER_IMG_NAME = controller
 
-REPO=docker.io/ffdl
-CONTROLLER_IMAGE_NAME=controller
-IMAGE_TAG?=latest
+#####################################################
+# Dynamically get the commons makefile for shared
+# variables and targets.
+#####################################################
+CM_REPO ?= raw.githubusercontent.com/ffdl-commons
+CM_VERSION ?= master
+CM_MK_LOC ?= .
+CM_MK_NM ?= "ffdl-commons.mk"
+
+# If the .mk file is changed on commons, and the file already exists here, it seems to update, but might take a while.
+# Delete the file and try again to make sure, if you are having trouble.
+CM_MK=$(shell wget -N https://${CM_REPO}/${CM_VERSION}/${CM_MK_NM} -P ${CM_MK_LOC} > /dev/null 2>&1 && echo "${CM_MK_NM}")
+
+include $(CM_MK)
+
+## show variable used in commons .mk include mechanism
+show_cm_vars:
+	@echo CM_REPO=$(CM_REPO)
+	@echo CM_VERSION=$(CM_VERSION)
+	@echo CM_MK_LOC=$(CM_MK_LOC)
+	@echo CM_MK_NM=$(CM_MK_NM)
+
+#####################################################
 
 STATE_MACHINE_PDF=docs/state-machine.pdf
-
-all: build push
-
-build: clean
-	docker build --label git-commit=$(shell git rev-list -1 HEAD) -t ${CONTROLLER_IMAGE_NAME}:${IMAGE_TAG} -f Dockerfile .
-	docker tag ${CONTROLLER_IMAGE_NAME}:${IMAGE_TAG} ${REPO}/${CONTROLLER_IMAGE_NAME}:${IMAGE_TAG}
-
-push:
-	docker push ${REPO}/${CONTROLLER_IMAGE_NAME}:${IMAGE_TAG}
 
 docs:
 	cat docs/state-machine.dot |docker run -i --entrypoint /usr/bin/dot andrewshawcare/graphviz -T pdf > ${STATE_MACHINE_PDF}
 
+docker-build: docker-build-base
 
 clean:
 	rm -rf build

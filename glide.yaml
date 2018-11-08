@@ -38,6 +38,8 @@ import:
   version: ^0.0.3
   subpackages:
   - cobra/cobra
+- package: github.com/spf13/pflag
+  version: 583c0c0531f06d5278b7d917446061adc344b5cd
 - package: github.com/spf13/viper
   version: ^1.2.1
 - package: golang.org/x/net
@@ -66,11 +68,11 @@ import:
   subpackages:
   - kubernetes
   - rest
-- package: github.com/stretchr/testify
-  version: ^1.2.2
-  subpackages:
-  - assert
 - package: golang.org/x/sys
   version: 1c9583448a9c3aa0f9a6a5241bf73c0bd8aafded
   subpackages:
   - unix
+testImport:
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert
