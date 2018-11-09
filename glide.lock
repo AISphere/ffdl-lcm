@@ -1,5 +1,5 @@
 hash: d16aaa932f0c624d7cb890e6726d9dd0063655a7fc244b7fde307ced92a72bf4
-updated: 2018-11-08T12:27:02.220837-05:00
+updated: 2018-11-08T14:15:10.607863-05:00
 imports:
 - name: github.com/AISphere/ffdl-commons
   version: 993a97472d1c072ca33b052a60efe0d251645a76
@@ -410,6 +410,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 04af85275a5c7ac09d16bb3b9b2e751ed45154e5
+  version: f35b8ab0b5a2cef36673838d662e249dd9c94686
   subpackages:
   - assert

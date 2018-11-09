@@ -45,50 +45,6 @@ ifeq ($(shell uname -s),Darwin)
 	sudo route -n add -net 172.17.0.0 $(DOCKERHOST_HOST)
 endif
 
-# Function for generating a template
-define render_template
-	eval "echo \"$$(cat $(1))\""
-endef
-
-# Total reinstall of vendor directories in all services.
-glide-reinstall-all:
-	glide cache-clear
-	rm -rf vendor && glide install
-	(cd $(TRAINER_SERVICE) && rm -rf vendor && glide install)
-	(cd $(TRAINING_DATA_SERVICE) && rm -rf vendor && glide install)
-	(cd $(RESTAPI_SERVICE) && rm -rf vendor && glide install)
-	(cd $(RATELIMITER_SERVICE) && rm -rf vendor && glide install)
-
-deploy-services: deploy-trainer deploy-lcm deploy-restapi deploy-training-data deploy-ratelimiter
-undeploy-services: undeploy-lcm undeploy-trainer undeploy-restapi undeploy-training-data undeploy-ratelimiter
-redeploy-services: undeploy-services deploy-services
-redeploy-lcm: undeploy-lcm deploy-lcm
-redeploy-trainer: undeploy-trainer deploy-trainer
-redeploy-restapi: undeploy-restapi deploy-restapi
-redeploy-training-data: undeploy-training-data deploy-training-data
-redeploy-ratelimiter: undeploy-ratelimiter deploy-ratelimiter
-
-deploy-trainer:
-	(cd $(TRAINER_SERVICE) && make deploy)
-
-undeploy-trainer:
-	(cd $(TRAINER_SERVICE) && make undeploy)
-
-deploy-training-data:
-	(cd $(TRAINING_DATA_SERVICE) && make deploy)
-
-undeploy-training-data:
-	(cd $(TRAINING_DATA_SERVICE) && make undeploy)
-
-deploy-ratelimiter:
-	(cd $(RATELIMITER_SERVICE) && make deploy)
-
-undeploy-ratelimiter:
-	(cd $(RATELIMITER_SERVICE) && make undeploy)
-
-show-inventory-file:
-	(echo $(INVENTORY))
-
 install-deps: install-deps-base protoc
 
 docker-build: docker-build-base
