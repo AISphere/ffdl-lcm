@@ -22,35 +22,14 @@ DOCKER_IMG_NAME = lifecycle-manager-service
 
 include ../ffdl-commons/ffdl-commons.mk
 
-protoc: protoc-trainer
+protoc: protoc-trainer                 ## Build gRPC .proto files into vendor directory
 
-test-start-deps:   ## Start test dependencies
-	docker run -d -p $(DLAAS_MONGO_PORT):27017 --name mongo mongo:3.0
+install-deps: install-deps-base protoc ## Remove vendor directory, rebuild dependencies
 
-# Stop test dependencies
-test-stop-deps:
-	-docker rm -f mongo
-
-TEST_PKGS ?= $(shell go list ./... | grep -v /vendor/)
-
-# Runs unit and integration tests
-test: test-base
-
-LOCALEXECCOMMAND ?= MUST_SET_LOCALEXECCOMMAND
-
-# Add a route on OS X to access docker instances directly
-#
-route-add-osx:
-ifeq ($(shell uname -s),Darwin)
-	sudo route -n add -net 172.17.0.0 $(DOCKERHOST_HOST)
-endif
-
-install-deps: install-deps-base protoc
-
-docker-build: docker-build-base
+docker-build: docker-build-base        ## Install dependencies if vendor folder is missing, build go code, build docker images (includes controller).
 	(cd controller && make docker-build)
 
-clean: clean-base
+clean: clean-base                      ## clean all build artifacts
 	if [ -d ./cmd/lcm/bin ]; then rm -r ./cmd/lcm/bin; fi
 
 .PHONY: all clean doctor usage showvars test-unit
