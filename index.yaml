@@ -1,0 +1,12 @@
+apiVersion: v1
+entries:
+  ffdl-lcm:
+  - appVersion: "3.3"
+    created: 2018-11-10T17:03:36.11496-05:00
+    description: FfDL Lifecycle Manager
+    digest: 5ff22d0ab16e99aa6be0cfcf0b37ccc3075d6317e031488f09bba4791d2964b0
+    name: ffdl-lcm
+    urls:
+    - ffdl-lcm-0.1.1.tgz
+    version: 0.1.1
+generated: 2018-11-10T17:03:36.11435-05:00
