@@ -9,18 +9,6 @@ docker:
   namespace: ffdl
   image_prefix: ffdl-
   pullPolicy: IfNotPresent
-trainer:
-  version: v0.1.1
-  port: 0
-  replicas: 1
-  cpus: 100m
-  memory: 64Mi
-#restapi:
-#  version: v0.1.1
-#  port: 0
-#  replicas: 1
-#  cpus: 50m
-#  memory: 64Mi
 lcm:
   version: v0.1.1
   port: 0
@@ -33,48 +21,16 @@ lcm:
   device_plugin: true
   # This will used for "volume.beta.kubernetes.io/storage-class" for the shared volume
   shared_volume_storage_class: ""
-trainingdata:
-  version: v0.1.1
-  port: 0
-  replicas: 1
-  cpus: 50m
-  memory: 64Mi
 learner:
   tag: master-97
   docker_namespace: ffdl
   kubeSecret: lcm-secrets
 databroker:
   tag: v0.1.1
-webui:
-  version: v0.1.1
-  port: 0
-  cpus: 50m
-  memory: 64Mi
-mongo:
-  address: localhost:27017
-  username: test
-  password: test
 etcd:
   address: http://etcd:2379
   username: test
   password: test
   prefix: test
-objectstore:
-  type: s3_datastore
-  username: test
-  password: test
-elasticsearch:
-  address: http://elasticsearch:9200
-  username: test
-  password: test
-  scheme: http
-prometheus:
-  deploy: true
-  etcd_urls: localhost:2379
-  cluster_name: FfDL
-  port: 9090
-  alertmanager_port: 9093
-grafana:
-  port: 3000
 log:
   level: INFO

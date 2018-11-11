@@ -23,7 +23,9 @@ STATE_MACHINE_PDF=docs/state-machine.pdf
 docs:
 	cat docs/state-machine.dot |docker run -i --entrypoint /usr/bin/dot andrewshawcare/graphviz -T pdf > ${STATE_MACHINE_PDF}
 
-docker-build: docker-build-only
+docker-build: docker-build-only        ## Build go code, build docker image.
+
+docker-push: docker-push-base          ## Push docker image to a docker hub
 
 clean:
 	rm -rf build

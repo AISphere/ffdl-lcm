@@ -94,8 +94,6 @@ spec:
           value: "{{.Values.lcm.mem_in_mb}}"
         - name: DLAAS_DEVICE_PLUGIN
           value: "{{.Values.lcm.device_plugin}}"
-        - name: DLAAS_IMAGE_TAG
-          value: {{.Values.restapi.version}}
         - name: DLAAS_IMAGE_PULL_POLICY
           value: {{.Values.docker.pullPolicy}}
         - name: DLAAS_ENV

@@ -29,6 +29,9 @@ install-deps: install-deps-base protoc ## Remove vendor directory, rebuild depen
 docker-build: docker-build-base        ## Install dependencies if vendor folder is missing, build go code, build docker images (includes controller).
 	(cd controller && make docker-build)
 
+docker-push: docker-push-base          ## Push docker image to a docker hub
+	(cd controller && make docker-push)
+
 clean: clean-base                      ## clean all build artifacts
 	if [ -d ./cmd/lcm/bin ]; then rm -r ./cmd/lcm/bin; fi
 
