@@ -19,7 +19,6 @@ package learner
 import (
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 
 	"github.com/spf13/viper"
 	"github.com/AISphere/ffdl-commons/config"
@@ -50,9 +49,9 @@ func GenerateImagePullSecret(k8sClient kubernetes.Interface, req *service.JobDep
 		}, nil
 	}
 
-	// if no token specified, then use ours
+	// if no token specified, do not use a pull secret
 	if req.ImageLocation.AccessToken == "" {
-		return []v1core.LocalObjectReference{}, errors.New("Custom image access token is missing")
+		return []v1core.LocalObjectReference{}, nil
 	}
 
 	// build a custom secret
