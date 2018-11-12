@@ -30,7 +30,7 @@ import (
 	"github.com/AISphere/ffdl-commons/config"
 
 	"github.com/AISphere/ffdl-commons/logger"
-	"github.com/AISphere/ffdl-commons/service"
+	"github.com/AISphere/ffdl-lcm/service"
 	"github.com/AISphere/ffdl-commons/util"
 	"github.com/AISphere/ffdl-lcm/coord"
 
@@ -166,6 +166,7 @@ func handleDeploymentFailure(s *lcmService, dlaasJobName string, tID string,
 	userID string, component string, logr *logger.LocLoggingEntry) {
 
 	logr.Errorf("updating status to FAILED")
+	// Calling updateJobStatus(...) puts a runtime dependedency on the Trainer microservice.  How to fix this?
 	if errUpd := updateJobStatus(tID, grpc_trainer_v2.Status_FAILED, userID, service.StatusMessages_INTERNAL_ERROR.String(), client.ErrCodeFailedDeploy, logr); errUpd != nil {
 		logr.WithError(errUpd).Errorf("after failed %s, error while calling Trainer service client update", component)
 	}

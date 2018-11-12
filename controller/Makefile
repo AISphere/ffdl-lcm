@@ -14,25 +14,23 @@
 # limitations under the License.
 #
 
+DOCKER_IMG_NAME = controller
 
-REPO=docker.io/ffdl
-CONTROLLER_IMAGE_NAME=controller
-IMAGE_TAG?=latest
+# Because we're down a level, have to do this to get the correct AISPHERE_DIR
+THIS_DIR = $(shell pwd)
+PARENT_DIR ?= $(shell dirname "$(THIS_DIR)")
+AISPHERE_DIR ?= $(shell dirname "$(PARENT_DIR)")
+
+include ../../ffdl-commons/ffdl-commons.mk
 
 STATE_MACHINE_PDF=docs/state-machine.pdf
-
-all: build push
-
-build: clean
-	docker build --label git-commit=$(shell git rev-list -1 HEAD) -t ${CONTROLLER_IMAGE_NAME}:${IMAGE_TAG} -f Dockerfile .
-	docker tag ${CONTROLLER_IMAGE_NAME}:${IMAGE_TAG} ${REPO}/${CONTROLLER_IMAGE_NAME}:${IMAGE_TAG}
-
-push:
-	docker push ${REPO}/${CONTROLLER_IMAGE_NAME}:${IMAGE_TAG}
 
 docs:
 	cat docs/state-machine.dot |docker run -i --entrypoint /usr/bin/dot andrewshawcare/graphviz -T pdf > ${STATE_MACHINE_PDF}
 
+docker-build: docker-build-only        ## Build go code, build docker image.
+
+docker-push: docker-push-base          ## Push docker image to a docker hub
 
 clean:
 	rm -rf build

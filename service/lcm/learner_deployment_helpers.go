@@ -29,7 +29,7 @@ import (
 
 	"github.com/AISphere/ffdl-commons/config"
 	"github.com/AISphere/ffdl-commons/logger"
-	"github.com/AISphere/ffdl-commons/service"
+	"github.com/AISphere/ffdl-lcm/service"
 
 	"golang.org/x/net/context"
 

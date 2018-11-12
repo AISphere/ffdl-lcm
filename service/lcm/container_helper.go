@@ -25,7 +25,7 @@ import (
 	"os"
 
 	"github.com/AISphere/ffdl-commons/config"
-	"github.com/AISphere/ffdl-commons/service"
+	"github.com/AISphere/ffdl-lcm/service"
 	"github.com/AISphere/ffdl-lcm/lcmconfig"
 	"github.com/AISphere/ffdl-lcm/service/lcm/learner"
 	yaml "gopkg.in/yaml.v2"

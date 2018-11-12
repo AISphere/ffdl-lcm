@@ -26,7 +26,7 @@ import (
 	"github.com/AISphere/ffdl-commons/config"
 	"github.com/AISphere/ffdl-commons/logger"
 	"github.com/AISphere/ffdl-commons/metricsmon"
-	"github.com/AISphere/ffdl-commons/service/client"
+	"github.com/AISphere/ffdl-lcm/service/client"
 	"github.com/AISphere/ffdl-commons/util"
 	"github.com/AISphere/ffdl-lcm/service/lcm"
 )

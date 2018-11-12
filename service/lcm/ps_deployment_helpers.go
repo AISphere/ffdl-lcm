@@ -24,7 +24,7 @@ import (
 
 	"github.com/AISphere/ffdl-commons/config"
 
-	"github.com/AISphere/ffdl-commons/service"
+	"github.com/AISphere/ffdl-lcm/service"
 	"github.com/AISphere/ffdl-commons/util"
 
 	"github.com/spf13/viper"
