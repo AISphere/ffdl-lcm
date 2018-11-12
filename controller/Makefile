@@ -16,6 +16,11 @@
 
 DOCKER_IMG_NAME = controller
 
+# Because we're down a level, have to do this to get the correct AISPHERE_DIR
+THIS_DIR = $(shell pwd)
+PARENT_DIR ?= $(shell dirname "$(THIS_DIR)")
+AISPHERE_DIR ?= $(shell dirname "$(PARENT_DIR)")
+
 include ../../ffdl-commons/ffdl-commons.mk
 
 STATE_MACHINE_PDF=docs/state-machine.pdf

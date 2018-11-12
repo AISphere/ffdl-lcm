@@ -9,7 +9,9 @@ docker:
   namespace: ffdl
   image_prefix: ffdl-
   pullPolicy: IfNotPresent
+  imagePullSecret: regcred
 lcm:
+  image_name: lifecycle-manager-service
   version: v0.1.1
   port: 0
   replicas: 1

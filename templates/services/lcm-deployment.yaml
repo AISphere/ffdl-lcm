@@ -20,6 +20,9 @@ spec:
         version:  {{.Values.lcm.version}}
     spec:
       volumes:
+        - name: ssl-certificates
+          secret:
+            secretName: service-ssl-certificates
 {{ if and (eq .Values.env "dev") .Values.learner.kubeSecret }}
         - name: learner-kube
           secret:
@@ -49,13 +52,16 @@ spec:
 {{ end }}
       containers:
       - name: ffdl-lcm-container
-        image: {{.Values.docker.registry}}/{{.Values.docker.namespace}}/{{.Values.docker.image_prefix}}lcm:{{.Values.lcm.version}}
+        image: {{.Values.docker.registry}}/{{.Values.docker.namespace}}/{{.Values.lcm.image_name}}:{{.Values.lcm.version}}
 {{ if .Values.docker.pullPolicy }}
         imagePullPolicy: {{.Values.docker.pullPolicy}}
 {{ end }}
         ports:
         - containerPort: 8443
         volumeMounts:
+        - mountPath: /etc/ssl/dlaas
+          name: ssl-certificates
+          readOnly: true
 {{ if and (eq .Values.env "dev") .Values.learner.kubeSecret }}
         - mountPath: /var/run/secrets/learner-kube
           name: learner-kube
@@ -145,4 +151,5 @@ spec:
           initialDelaySeconds: 15
           timeoutSeconds: 2
       imagePullSecrets:
-      - name: regcred
+      - name: {{.Values.docker.imagePullSecret}}
+
