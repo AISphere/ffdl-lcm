@@ -19,7 +19,11 @@ spec:
         environment: {{.Values.env}}
         version:  {{.Values.lcm.version}}
     spec:
+      serviceAccountName: editor
       volumes:
+        - name: learner-config-json
+          configMap:
+            name: learner-config-new
         - name: ssl-certificates
           secret:
             secretName: service-ssl-certificates
@@ -56,6 +60,8 @@ spec:
         ports:
         - containerPort: 8443
         volumeMounts:
+        - mountPath: /etc/learner-config-json/
+          name: learner-config-json
         - mountPath: /etc/ssl/dlaas
           name: ssl-certificates
           readOnly: true
@@ -73,6 +79,12 @@ spec:
           name: etcd-ssl-cert
           readOnly: true
         env:
+        - name: DLAAS_IMAGE_TAG
+          value:  "{{.Values.lcm.image_tag}}"
+        - name: TRAINER_SERVICE_NAME
+          value: "{{.Values.lcm.trainer_service_name}}"
+        - name: DATA_SERVICE_NAME
+          value: "{{.Values.lcm.data_service_name}}"
         - name: DLAAS_POD_NAME
           valueFrom:
             fieldRef:
