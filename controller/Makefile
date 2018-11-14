@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-DOCKER_IMG_NAME = controller
+DOCKER_IMG_NAME = dlaas-controller
 
 # Because we're down a level, have to do this to get the correct AISPHERE_DIR
 THIS_DIR = $(shell pwd)
