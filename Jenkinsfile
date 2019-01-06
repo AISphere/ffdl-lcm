@@ -60,7 +60,7 @@ pipeline {
         stage('git checkout') {
             steps {
                 echo 'checking dependent repos out'
-                
+
                 sh "rm -rf ${env.AISPHERE}/git"
 
                 // Note: I tried to get the names of these dynamically and get the repos in
@@ -112,7 +112,7 @@ pipeline {
         }
         stage('install deps') {
             steps {
-                dir("$AISPHERE/ffdl-trainer") {
+                dir("$AISPHERE/ffdl-lcm") {
                     sh "make ensure-protoc-installed"
                     sh "make install-deps-if-needed"
                 }
@@ -120,7 +120,7 @@ pipeline {
         }
         stage('build') {
             steps {
-                dir("$AISPHERE/ffdl-trainer") {
+                dir("$AISPHERE/ffdl-lcm") {
                     sh "make build-x86-64"
                     sh "make build-grpc-health-checker"
                 }
@@ -128,7 +128,7 @@ pipeline {
         }
         stage('docker-build') {
             steps {
-                dir("$AISPHERE/ffdl-trainer") {
+                dir("$AISPHERE/ffdl-lcm") {
                     script {
                         withDockerServer([uri: "unix:///var/run/docker.sock"]) {
                             withDockerRegistry([credentialsId: "${env.DOCKERHUB_CREDENTIALS_ID}",
