@@ -60,6 +60,8 @@ pipeline {
         stage('git checkout') {
             steps {
                 echo 'checking dependent repos out'
+                
+                sh "rm -rf ${env.AISPHERE}/git"
 
                 // Note: I tried to get the names of these dynamically and get the repos in
                 // a loop, but it got too tricky and this is good for now.
