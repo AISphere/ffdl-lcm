@@ -1,0 +1,13 @@
+apiVersion: v1
+entries:
+  ffdl-lcm:
+  - appVersion: "3.3"
+    created: 2019-01-11T16:13:53.665641-08:00
+    description: FfDL Lifecycle Manager
+    digest: 90301d9f81e465891bde49edd6976c3f64653bc3edd8a7fbd9a866ea8cd6045e
+    icon: https://raw.githubusercontent.com/AISphere/ffdl-dashboard/master/web-gui/src/assets/img/ffdl.png
+    name: ffdl-lcm
+    urls:
+    - https://aisphere.github.io/ffdl-lcm/helm/ffdl-lcm-0.1.1.tgz
+    version: 0.1.1
+generated: 2019-01-11T16:13:53.665107-08:00

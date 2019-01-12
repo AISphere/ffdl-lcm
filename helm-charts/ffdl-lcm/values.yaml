@@ -1,0 +1,41 @@
+namespace: default
+env: dev
+k8s_1dot8_or_above: true
+has_static_volumes: true
+services:
+  expose_node_port: true
+docker:
+  registry: docker.io
+  namespace: ffdl
+  image_prefix: ffdl-
+  pullPolicy: IfNotPresent
+  imagePullSecret: regcred
+lcm:
+  image_name: lifecycle-manager-service
+  version: v0.1.1
+  port: 0
+  replicas: 1
+  cpus: 100m
+  memory: 64Mi
+  load_training_data_mem_in_mb: 300
+  milli_cpu: 60
+  mem_in_mb: 300
+  device_plugin: true
+  # This will used for "volume.beta.kubernetes.io/storage-class" for the shared volume
+  shared_volume_storage_class: ""
+  trainer_service_name: "ffdl-trainer"
+  data_service_name: "ffdl-trainingdata"
+  image_tag: "dev"
+learner:
+  tag: master-97
+  docker_namespace: ffdl
+  kubeSecret: lcm-secrets
+databroker:
+  tag: v0.1.1
+etcd:
+  address: http://etcd:2379
+  username: test
+  password: test
+  prefix: test
+log:
+  level: INFO
