@@ -50,6 +50,9 @@ pipeline {
                 echo "Testing glide"
                 sh "which glide"
 
+                echo "Testing rsync"
+                sh "which rsync"
+
                 echo "Testing go"
                 sh "go version"
             }
