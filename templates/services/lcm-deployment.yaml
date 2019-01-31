@@ -81,10 +81,12 @@ spec:
         env:
         - name: DLAAS_IMAGE_TAG
           value:  "{{.Values.lcm.image_tag}}"
-        - name: TRAINER_SERVICE_NAME
-          value: "{{.Values.lcm.trainer_service_name}}"
-        - name: DATA_SERVICE_NAME
-          value: "{{.Values.lcm.data_service_name}}"
+        - name: DLAAS_TRAINER_SERVICE_NAME
+          value: "{{.Values.global.trainer_service_name}}"
+        - name: DLAAS_TDS_SERVICE_NAME
+          value: "{{.Values.global.tds_service_name}}"
+        - name: DLAAS_LCM_SERVICE_NAME
+          value: "{{.Values.global.lcm_service_name}}"
         - name: DLAAS_POD_NAME
           valueFrom:
             fieldRef:

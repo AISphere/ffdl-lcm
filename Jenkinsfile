@@ -98,6 +98,15 @@ pipeline {
                 }
             }
         }
+        stage('lint') {
+            steps {
+                dir("$AISPHERE/${env.DOCKER_REPO_NAME}") {
+                    // Wait until after code reversal to do lints
+                    // sh "make lint"
+                    sh "make vet"
+                }
+            }
+        }
         stage('build') {
             steps {
                 dir("$AISPHERE/${env.DOCKER_REPO_NAME}") {
@@ -113,8 +122,11 @@ pipeline {
                         withDockerServer([uri: "unix:///var/run/docker.sock"]) {
                             withDockerRegistry([credentialsId: "${env.DOCKERHUB_CREDENTIALS_ID}",
                                                 url: "https://registry.ng.bluemix.net"]) {
-                                withEnv(["DLAAS_IMAGE_TAG=${env.JOB_BASE_NAME}"]) {
-                                    sh "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
+                                withEnv(["DLAAS_IMAGE_TAG=${env.JOB_BASE_NAME}",
+                                         "DOCKER_HOST=${env.DOCKERHUB_HOST}",
+                                         "DOCKER_NAMESPACE=$DOCKER_NAMESPACE", "DOCKER_IMG_NAME=$DOCKER_IMG_NAME"]) {
+                                    // sh "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
+                                    sh "make docker-build"
                                 }
                             }
                         }
@@ -141,8 +153,11 @@ pipeline {
                         withDockerServer([uri: "unix:///var/run/docker.sock"]) {
                             withDockerRegistry([credentialsId: "${env.DOCKERHUB_CREDENTIALS_ID}",
                                                 url: "https://registry.ng.bluemix.net"]) {
-                                withEnv(["DLAAS_IMAGE_TAG=${env.JOB_BASE_NAME}"]) {
-                                    sh "docker push \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\""
+                                withEnv(["DLAAS_IMAGE_TAG=${env.JOB_BASE_NAME}",
+                                         "DOCKER_HOST=${env.DOCKERHUB_HOST}",
+                                         "DOCKER_NAMESPACE=$DOCKER_NAMESPACE", "DOCKER_IMG_NAME=$DOCKER_IMG_NAME"]) {
+                                    // sh "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
+                                    sh "make docker-push"
                                 }
                             }
                         }

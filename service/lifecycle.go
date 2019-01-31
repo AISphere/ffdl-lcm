@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package service
 
 import (
@@ -47,13 +46,15 @@ type Lifecycle struct {
 	RegisterService func()
 }
 
-type Config struct {
-	port       int
-	background bool
-	tls        bool
-	certFile   string
-	keyFile    string
-}
+// Configuration struct for LifecycleHandler
+// (Note I can't find where, or if, this is used. -sb)
+//	type Config struct {
+//		port       int
+//		background bool
+//		tls        bool
+//		certFile   string
+//		keyFile    string
+//	}
 
 // Start will start a gRPC microservice on a given port and run it either in
 // foreground or background.
