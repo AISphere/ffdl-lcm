@@ -128,7 +128,7 @@ pipeline {
                                 withEnv(["DLAAS_IMAGE_TAG=${env.JOB_BASE_NAME}",
                                          "DOCKER_HOST=${env.DOCKERHUB_HOST}",
                                          "DOCKER_NAMESPACE=$DOCKER_NAMESPACE", "DOCKER_IMG_NAME=$DOCKER_IMG_NAME"]) {
-                                    // sh "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
+                                    sh "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
                                     sh "make docker-build"
                                 }
                             }
