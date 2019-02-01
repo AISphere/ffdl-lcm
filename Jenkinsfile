@@ -129,7 +129,6 @@ pipeline {
                                                 url: "https://registry.ng.bluemix.net"]) {
                                 echo "Executing withEnv"
                                 withEnv(["DLAAS_IMAGE_TAG=${env.JOB_BASE_NAME}",
-                                         "DOCKER_HOST=${env.DOCKERHUB_HOST}",
                                          "DOCKER_NAMESPACE=$DOCKER_NAMESPACE", "DOCKER_IMG_NAME=$DOCKER_IMG_NAME"]) {
                                     // echo "docker ps"
                                     // sh "docker ps"
