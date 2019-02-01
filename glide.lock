@@ -1,8 +1,8 @@
-hash: d16aaa932f0c624d7cb890e6726d9dd0063655a7fc244b7fde307ced92a72bf4
-updated: 2018-11-08T14:15:10.607863-05:00
+hash: 7922b0d2dc3fc5dd3e983ff76c415625d316ec061747a94597378d34101218ec
+updated: 2019-02-01T10:57:05.868689-05:00
 imports:
 - name: github.com/AISphere/ffdl-commons
-  version: 993a97472d1c072ca33b052a60efe0d251645a76
+  version: 0cd170afcd8365e3f8a002993482b75294d8905a
   repo: https://github.com/sboagibm/ffdl-commons.git
   subpackages:
   - config
@@ -18,9 +18,9 @@ imports:
   subpackages:
   - quantile
 - name: github.com/cenkalti/backoff
-  version: 2ea60e5f094469f9e65adb9cd103795b73ae743e
+  version: 1e4cf3da559842a91afcb6ea6141451e6c30c618
 - name: github.com/coreos/etcd
-  version: 27fc7e2296f506182f58ce846e48f36b34fe6842
+  version: 2cf9e51d2a78003b164c2998886158e60ded1cbb
   subpackages:
   - auth/authpb
   - clientv3
@@ -41,7 +41,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 0ca9ea5df5451ffdf184b4428c902747c2c11cd7
 - name: github.com/go-kit/kit
-  version: ca4112baa34cb55091301bdc13b1420a122b1b9e
+  version: 12210fb6ace19e0496167bb3e667dcd91fa9f69b
   subpackages:
   - log
   - metrics
@@ -60,8 +60,6 @@ imports:
   version: 7abd5745472fff5eb3685386d5fb8bf38683154d
 - name: github.com/go-openapi/swag
   version: f3f9494671f93fcff853e3c6e9e948b3eb71e590
-- name: github.com/go-stack/stack
-  version: 2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a
 - name: github.com/gogo/protobuf
   version: 342cbe0a04158f6dcb03ca0079991a51a4248c02
   subpackages:
@@ -116,7 +114,7 @@ imports:
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/magiconair/properties
-  version: c2353362d570a7bfa228149c62842019201cfb71
+  version: 7c38529aac7222391b7a2661365177a97e21b998
 - name: github.com/mailru/easyjson
   version: 2f5df55504ebc322e4d52d34df6a1f5b503bf26d
   subpackages:
@@ -124,7 +122,7 @@ imports:
   - jlexer
   - jwriter
 - name: github.com/matttproud/golang_protobuf_extensions
-  version: c12348ce28de40eed0136aa2b644d0ee0650e56c
+  version: c182affec369e30f25d3eb8cd8a478dee585ae7d
   subpackages:
   - pbutil
 - name: github.com/mitchellh/mapstructure
@@ -134,11 +132,11 @@ imports:
 - name: github.com/modern-go/reflect2
   version: 05fbef0ca5da472bbf96c9322b84a53edc03c9fd
 - name: github.com/pelletier/go-toml
-  version: 81a861c69d25a841d0c4394f0e6f84bc8c5afae0
+  version: 27c6b39a135b7dc87a14afb068809132fb7a9a8f
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/prometheus/client_golang
-  version: abad2d1bd44235a26707c172eab6bca5bf2dbad3
+  version: 505eaef017263e299324067d40ca2c48f6a2cf50
   subpackages:
   - prometheus
   - prometheus/internal
@@ -166,7 +164,7 @@ imports:
 - name: github.com/sony/gobreaker
   version: b2a34562d02c4d5fd6645399c69e00141fb24e5a
 - name: github.com/spf13/afero
-  version: d40851caa0d747393da1ffb28f7f9d8b4eeffebd
+  version: a5d6946387efe7d64d09dcba68cdd523dc1273a3
   subpackages:
   - mem
 - name: github.com/spf13/cast
@@ -180,9 +178,9 @@ imports:
 - name: github.com/spf13/pflag
   version: 583c0c0531f06d5278b7d917446061adc344b5cd
 - name: github.com/spf13/viper
-  version: 2c12c60302a5a0e62ee102ca9bc996277c2f64f5
+  version: 6d33b5a963d922d182c91e8a1c88d81fd150cfd4
 - name: golang.org/x/crypto
-  version: e4dc69e5b2fd71dcaf8bd5d054eb936deb78d1fa
+  version: 81e90905daefcd6fd217b62423c0908922eadb30
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
@@ -219,14 +217,16 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 2e463a05d100327ca47ac218281906921038fd95
+  version: a02b0774206b209466313a0b525d2c738fe407eb
   subpackages:
   - balancer
   - balancer/base
   - balancer/roundrobin
+  - binarylog/grpc_binarylog_v1
   - codes
   - connectivity
   - credentials
+  - credentials/internal
   - encoding
   - encoding/proto
   - grpclog
@@ -234,9 +234,12 @@ imports:
   - health/grpc_health_v1
   - internal
   - internal/backoff
+  - internal/binarylog
   - internal/channelz
   - internal/envconfig
   - internal/grpcrand
+  - internal/grpcsync
+  - internal/syscall
   - internal/transport
   - keepalive
   - metadata
@@ -251,7 +254,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
+  version: 51d6538a90f86fe93ac480b35f37b2be17fef232
 - name: k8s.io/api
   version: 11147472b7c934c474a2c484af3c0c5210b7a3af
   subpackages:
