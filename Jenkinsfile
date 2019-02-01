@@ -122,16 +122,18 @@ pipeline {
             steps {
                 dir("$AISPHERE/${env.DOCKER_REPO_NAME}") {
                     script {
-                        sh "Executing withDockerServer"
+                        echo "Executing withDockerServer"
                         withDockerServer([uri: "unix:///var/run/docker.sock"]) {
-                            sh "Executing withDockerRegistry"
+                            echo "Executing withDockerRegistry"
                             withDockerRegistry([credentialsId: "${env.DOCKERHUB_CREDENTIALS_ID}",
                                                 url: "https://registry.ng.bluemix.net"]) {
-                                sh "Executing withEnv"
+                                echo "Executing withEnv"
                                 withEnv(["DLAAS_IMAGE_TAG=${env.JOB_BASE_NAME}",
                                          "DOCKER_HOST=${env.DOCKERHUB_HOST}",
                                          "DOCKER_NAMESPACE=$DOCKER_NAMESPACE", "DOCKER_IMG_NAME=$DOCKER_IMG_NAME"]) {
-                                    // sh "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
+                                    echo "make docker build"
+                                    sh "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
+                                    echo "make docker-build"
                                     sh "make docker-build"
                                 }
                             }
