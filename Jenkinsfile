@@ -131,10 +131,10 @@ pipeline {
                                 withEnv(["DLAAS_IMAGE_TAG=${env.JOB_BASE_NAME}",
                                          "DOCKER_HOST=${env.DOCKERHUB_HOST}",
                                          "DOCKER_NAMESPACE=$DOCKER_NAMESPACE", "DOCKER_IMG_NAME=$DOCKER_IMG_NAME"]) {
-                                    echo "docker ps"
-                                    sh "docker ps"
-                                    echo "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
-                                    sh "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
+                                    // echo "docker ps"
+                                    // sh "docker ps"
+                                    // echo "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
+                                    // sh "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
                                     echo "make docker-build"
                                     sh "make docker-build"
                                 }
