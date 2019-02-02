@@ -122,22 +122,15 @@ pipeline {
             steps {
                 dir("$AISPHERE/${env.DOCKER_REPO_NAME}") {
                     script {
-                        echo "Executing withDockerServer"
-                        withDockerServer([uri: "unix:///var/run/docker.sock"]) {
-                            echo "Executing withDockerRegistry"
-                            withDockerRegistry([credentialsId: "${env.DOCKERHUB_CREDENTIALS_ID}",
-                                                url: "https://registry.ng.bluemix.net"]) {
-                                echo "Executing withEnv"
-                                withEnv(["DLAAS_IMAGE_TAG=${env.JOB_BASE_NAME}",
-                                         "DOCKER_NAMESPACE=$DOCKER_NAMESPACE", "DOCKER_IMG_NAME=$DOCKER_IMG_NAME"]) {
-                                    // echo "docker ps"
-                                    // sh "docker ps"
-                                    echo "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
-                                    sh "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
-                                    // echo "make docker-build"
-                                    // sh "make docker-build"
-                                }
-                            }
+                        withEnv(["DLAAS_IMAGE_TAG=${env.JOB_BASE_NAME}",
+                                 "DOCKER_HOST_NAME=${env.DOCKERHUB_HOST}",
+                                 "DOCKER_NAMESPACE=$DOCKER_NAMESPACE", "DOCKER_IMG_NAME=$DOCKER_IMG_NAME"]) {
+                            // echo "docker ps"
+                            // sh "docker ps"
+                            // echo "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
+                            // sh "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
+                            echo "make docker-build"
+                            sh "make docker-build"
                         }
                     }
                 }
@@ -163,7 +156,7 @@ pipeline {
                             withDockerRegistry([credentialsId: "${env.DOCKERHUB_CREDENTIALS_ID}",
                                                 url: "https://registry.ng.bluemix.net"]) {
                                 withEnv(["DLAAS_IMAGE_TAG=${env.JOB_BASE_NAME}",
-                                         "DOCKER_HOST=${env.DOCKERHUB_HOST}",
+                                         "DOCKER_HOST_NAME=${env.DOCKERHUB_HOST}",
                                          "DOCKER_NAMESPACE=$DOCKER_NAMESPACE", "DOCKER_IMG_NAME=$DOCKER_IMG_NAME"]) {
                                     // sh "docker build -t \"${env.DOCKERHUB_HOST}/$DOCKER_NAMESPACE/$DOCKER_IMG_NAME:$DLAAS_IMAGE_TAG\" ."
                                     sh "make docker-push"
