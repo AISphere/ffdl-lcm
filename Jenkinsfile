@@ -141,7 +141,7 @@ pipeline {
         }
         stage('Integration Test') {
             steps {
-                echo 'Integration testing for the fun of it..'
+                echo 'Integration testing is supposed be here.'
             }
         }
         stage('push') {
