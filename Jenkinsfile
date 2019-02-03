@@ -8,11 +8,11 @@ pipeline {
         }
     }
     environment {
-        GOPATH = "${env.WORKSPACE}/${env.BUILD_NUMBER}/git"
+        GOPATH = "${env.WORKSPACE}/git"
         AISPHERE = "${env.GOPATH}/src/github.com/AISphere"
         PROTOC_ZIP = "protoc-3.6.1-linux-x86_64.zip"
         DOCKER_NAMESPACE = "dlaas_dev"
-        DOCKER_REPO_NAME="${env.JOB_NAME}".substring("aisphere/".length(), "${env.JOB_NAME}".length() - "${env.BRANCH_NAME}".length() - 1)
+        DOCKER_REPO_NAME="${env.JOB_NAME}".substring("AI-Sphere2/".length(), "${env.JOB_NAME}".length() - "${env.BRANCH_NAME}".length() - 1)
         DOCKER_IMG_NAME = "${env.DOCKER_REPO_NAME}"
         DOCKERHUB_CREDENTIALS_ID = "bluemix-cr-ng"
         DOCKERHUB_HOST = "registry.ng.bluemix.net"
