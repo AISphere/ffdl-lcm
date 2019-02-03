@@ -8,7 +8,7 @@ pipeline {
         }
     }
     environment {
-        GOPATH = "${env.WORKSPACE}/git"
+        GOPATH = "${env.WORKSPACE}/${env.BUILD_NUMBER}/git"
         AISPHERE = "${env.GOPATH}/src/github.com/AISphere"
         PROTOC_ZIP = "protoc-3.6.1-linux-x86_64.zip"
         DOCKER_NAMESPACE = "dlaas_dev"
@@ -95,6 +95,9 @@ pipeline {
         }
         stage('install deps') {
             steps {
+                echo "AISPHERE is $AISPHERE"
+                echo "DOCKER_REPO_NAME is $DOCKER_REPO_NAME"
+
                 dir("$AISPHERE/${env.DOCKER_REPO_NAME}") {
                     sh "make ensure-protoc-installed"
                     sh "make install-deps-if-needed"
