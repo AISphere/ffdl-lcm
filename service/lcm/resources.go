@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	devicePlugin               = "device_plugin"
+	devicePlugin = "device_plugin"
 )
 
 func (s *lcmService) currentResourceSnapshot(jdreq *service.JobDeploymentRequest, numLearners int, logr *logger.LocLoggingEntry) bool {
@@ -152,7 +152,7 @@ func getResources(s *lcmService, logr *logger.LocLoggingEntry) (bool, *allocatab
 
 	// Define GPU resource as device plugin or accelerator
 	var resourceGPU v1core.ResourceName = "nvidia.com/gpu"
-	if !GetDevicePlugin() {
+	if !getDevicePlugin() {
 		resourceGPU = v1core.ResourceNvidiaGPU
 	}
 
@@ -217,7 +217,7 @@ func getResources(s *lcmService, logr *logger.LocLoggingEntry) (bool, *allocatab
 
 }
 
-func GetDevicePlugin() bool {
+func getDevicePlugin() bool {
 	if viper.IsSet(devicePlugin) {
 		return viper.GetBool(devicePlugin)
 	}
