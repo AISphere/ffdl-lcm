@@ -26,10 +26,15 @@ protoc: protoc-trainer                 ## Build gRPC .proto files into vendor di
 
 install-deps: install-deps-base protoc ## Remove vendor directory, rebuild dependencies
 
-docker-build: docker-build-base        ## Install dependencies if vendor folder is missing, build go code, build docker images (includes controller).
-	(cd controller && make docker-build)
+docker-build-controller:  ## Build controller image
+	(cd controller && DOCKER_IMG_NAME="controller" make docker-build)
 
-docker-push: docker-push-base          ## Push docker image to a docker hub
+docker-push-controller:  ## Push controller docker image to a docker hub
+	(cd controller && DOCKER_IMG_NAME="controller" make docker-push)
+
+docker-build: docker-build-base docker-build-controller        ## Install dependencies if vendor folder is missing, build go code, build docker images (includes controller).
+
+docker-push: docker-push-base docker-push-controller           ## Push docker image to a docker hub
 	(cd controller && make docker-push)
 
 clean: clean-base                      ## clean all build artifacts
