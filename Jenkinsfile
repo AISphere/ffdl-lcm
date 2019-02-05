@@ -125,7 +125,7 @@ pipeline {
             steps {
                 dir("$AISPHERE/${env.DOCKER_REPO_NAME}") {
                     script {
-                        withEnv(["DLAAS_IMAGE_TAG=${env.JOB_BASE_NAME}",
+                        withEnv(["DLAAS_IMAGE_TAG=${env.JOB_BASE_NAME}-ffdl",
                                  "DOCKER_HOST_NAME=${env.DOCKERHUB_HOST}",
                                  "DOCKER_NAMESPACE=$DOCKER_NAMESPACE", "DOCKER_IMG_NAME=$DOCKER_IMG_NAME"]) {
                             echo "make docker-build"
