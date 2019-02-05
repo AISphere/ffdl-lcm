@@ -35,7 +35,6 @@ docker-push-controller:  ## Push controller docker image to a docker hub
 docker-build: docker-build-base docker-build-controller        ## Install dependencies if vendor folder is missing, build go code, build docker images (includes controller).
 
 docker-push: docker-push-base docker-push-controller           ## Push docker image to a docker hub
-	(cd controller && make docker-push)
 
 clean: clean-base                      ## clean all build artifacts
 	if [ -d ./cmd/lcm/bin ]; then rm -r ./cmd/lcm/bin; fi
