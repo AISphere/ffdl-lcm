@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,11 @@ func (t nonSplitTraining) Start() error {
 	helperDefn := t.helper
 
 	helperAndLearnerVolumes := append(learnerDefn.volumes, helperDefn.etcdVolume, helperDefn.sharedVolume)
-	helperContainers := t.constructAuxillaryContainers()
+	helperContainers := t.constructAuxillaryContainers(false)
 
 	//now create the learner container
-	learnerContainer := constructLearnerContainer(t.req, learnerDefn.envVars, learnerDefn.volumeMounts,
-		helperDefn.sharedVolumeMount, learnerDefn.mountTrainingDataStoreInLearner,
-		learnerDefn.mountResultsStoreInLearner, t.logr)
+	useLogCollector := useLogCollectors(t.k8sClient, t.logr)
+	learnerContainer := constructLearnerContainer(t.req, learnerDefn.envVars, learnerDefn.volumeMounts, helperDefn.sharedVolumeMount, learnerDefn.mountTrainingDataStoreInLearner, learnerDefn.mountResultsStoreInLearner, learnerDefn.mountSSHCertsInLearner, t.logr, useLogCollector)
 	helperContainers = append(helperContainers, learnerContainer)
 
 	imagePullSecret, err := learner.GenerateImagePullSecret(t.k8sClient, t.req)
@@ -47,12 +46,23 @@ func (t nonSplitTraining) Start() error {
 	}
 
 	//create pod, service, statefuleset spec
-	labelsMap := map[string]string{"training_id": t.req.TrainingId, "user_id": t.req.UserId, "deploy_zone": t.req.Labels["deploy_zone"], "framework": t.req.Framework + t.req.Version}
-	gpuTolerations := getGpuToleration(t.req.Resources.GpuType)
+	labelsMap := map[string]string{
+		"training_id": t.req.TrainingId,
+		"user_id":     t.req.UserId,
+		"deploy_zone": t.req.Labels["deploy_zone"],
+		"framework":   t.req.Framework + t.req.Version,
+		"gpu_type":    t.req.Resources.GpuType,
+		"kube_major":  t.req.Labels["kube_major"],
+		"kube_minor":  t.req.Labels["kube_minor"],
+		"cluster_env": t.req.Labels["cluster_env"],
+	}
+	gpuTolerations := getTolerations(t.req.Resources.GpuType, 30)
+	termGracePeriodSecs := getTermGracePeriodSecs(0)
+
 	if isCPUOnly(t.req.Resources.GpuType) {
 		gpus["gpu/nvidia"] = "NA"
 	}
-	nonSplitLearnerPodSpec := learner.CreatePodSpec(helperContainers, helperAndLearnerVolumes, labelsMap, gpus, imagePullSecret, nil, gpuTolerations)
+	nonSplitLearnerPodSpec := learner.CreatePodSpec(helperContainers, helperAndLearnerVolumes, labelsMap, gpus, imagePullSecret, nil, gpuTolerations, termGracePeriodSecs)
 	serviceSpec := learner.CreateServiceSpec(learnerDefn.name, t.req.TrainingId)
 	statefulSetSpec := learner.CreateStatefulSetSpecForLearner(learnerDefn.name, serviceSpec.Name, learnerDefn.numberOfLearners, nonSplitLearnerPodSpec)
 
@@ -60,6 +70,7 @@ func (t nonSplitTraining) Start() error {
 
 	return t.CreateFromBOM(&nonSplitTrainingBOM{
 		learnerDefn.secrets,
+		learnerDefn.networkingPolicy,
 		serviceSpec,
 		statefulSetSpec,
 		numLearners,
@@ -71,6 +82,14 @@ func (t nonSplitTraining) Start() error {
 func (t nonSplitTraining) CreateFromBOM(bom *nonSplitTrainingBOM) error {
 	logr := t.logr
 	namespace := config.GetLearnerNamespace()
+
+	if bom.networkPolicy != nil {
+		logr.Infof("Applying network policy for training")
+		if _, err := t.k8sClient.NetworkingV1().NetworkPolicies(namespace).Create(bom.networkPolicy); err != nil {
+			logr.WithError(err).Errorf("Failed in creating policy %s while deploying for training ", bom.networkPolicy.Name)
+			return err
+		}
+	}
 
 	for _, secret := range bom.secrets {
 		//create the secrets

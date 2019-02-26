@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package lcm
 
 import (
@@ -27,7 +26,7 @@ import (
 	"github.com/AISphere/ffdl-lcm/service"
 
 	"github.com/spf13/viper"
-	v1beta1 "k8s.io/api/apps/v1beta1"
+	"k8s.io/api/apps/v1beta1"
 	v1core "k8s.io/api/core/v1"
 	v1resource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,7 +43,7 @@ func populateJobMonitorEnvVariablesAndLabels(req *service.JobDeploymentRequest, 
 				SecretKeyRef: &v1core.SecretKeySelector{
 					Key: lookupkey,
 					LocalObjectReference: v1core.LocalObjectReference{
-						Name: "lcm-secrets",
+						Name: config.GetLCMSecret(),
 					},
 				},
 			},
@@ -97,6 +96,14 @@ func populateJobMonitorEnvVariablesAndLabels(req *service.JobDeploymentRequest, 
 			Name:  "DLAAS_LEARNER_KUBE_NAMESPACE",
 			Value: config.GetLearnerNamespace(),
 		},
+		v1core.EnvVar{
+			Name:  "DLAAS_TRAINER_SERVICE_NAME",
+			Value: config.GetTrainerServiceName(),
+		},
+		v1core.EnvVar{
+			Name:  "DLAAS_LCM_SERVICE_NAME",
+			Value: config.GetLCMServiceName(),
+		},
 	}
 
 	// add all labels passed from the user API
@@ -128,7 +135,9 @@ func defineJobMonitorDeployment(req *service.JobDeploymentRequest, envVars []v1c
 	memInBytes := int64(512 * 1024 * 1024)
 	memCount := v1resource.NewQuantity(memInBytes, v1resource.DecimalSI)
 	logr.Debugf("job monitor: cpu %+v, mem %+v", cpuCount, memCount)
+	logr.Debugf("lcm secret: %s", config.GetLCMSecret())
 	jmName := constructJMName(req.Name)
+	serviceAccount := config.GetLCMServiceAccount()
 
 	deploySpec := &v1beta1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -160,18 +169,27 @@ func defineJobMonitorDeployment(req *service.JobDeploymentRequest, envVars []v1c
 					},
 				},
 				Spec: v1core.PodSpec{
+					ServiceAccountName: serviceAccount,
 					Volumes: []v1core.Volume{
 						v1core.Volume{
 							Name: "etcd-ssl-cert",
 							VolumeSource: v1core.VolumeSource{
 								Secret: &v1core.SecretVolumeSource{
-									SecretName: "lcm-secrets",
+									SecretName: config.GetLCMSecret(),
 									Items: []v1core.KeyToPath{
 										v1core.KeyToPath{
 											Key:  "DLAAS_ETCD_CERT",
 											Path: "etcd/etcd.cert",
 										},
 									},
+								},
+							},
+						},
+						v1core.Volume{
+							Name: "ssl-certificates",
+							VolumeSource: v1core.VolumeSource{
+								Secret: &v1core.SecretVolumeSource{
+									SecretName: config.GetSSLSecret(),
 								},
 							},
 						},
@@ -186,6 +204,11 @@ func defineJobMonitorDeployment(req *service.JobDeploymentRequest, envVars []v1c
 								v1core.VolumeMount{
 									Name:      "etcd-ssl-cert",
 									MountPath: "/etc/certs/",
+									ReadOnly:  true,
+								},
+								v1core.VolumeMount{
+									Name:      "ssl-certificates",
+									MountPath: "/etc/ssl/dlaas/",
 									ReadOnly:  true,
 								},
 							},

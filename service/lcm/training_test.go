@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,20 @@ func TestNodeAffinityTrue(t *testing.T) {
 	}
 }
 
-func TestGpuToleration(t *testing.T) {
-	gpuToleration, err := json.Marshal(getGpuToleration("nvidia-TeslaV100"))
+func TestGpuTolerations(t *testing.T) {
+	gpuToleration, err := json.Marshal(getTolerations("nvidia-TeslaV100", 30))
 	if err != nil {
 		t.Fail()
 	} else {
-		assert.Equal(t, string(gpuToleration), "[{\"key\":\"dedicated\",\"operator\":\"Equal\",\"value\":\"gpu-task\",\"effect\":\"NoSchedule\"}]")
+		assert.Equal(t, "[{\"key\":\"node.kubernetes.io/not-ready\",\"operator\":\"Exists\",\"effect\":\"NoExecute\",\"tolerationSeconds\":30},{\"key\":\"node.kubernetes.io/unreachable\",\"operator\":\"Exists\",\"effect\":\"NoExecute\",\"tolerationSeconds\":30},{\"key\":\"dedicated\",\"operator\":\"Equal\",\"value\":\"gpu-task\",\"effect\":\"NoSchedule\"}]", string(gpuToleration))
+	}
+}
+
+func TestCpuTolerations(t *testing.T) {
+	gpuToleration, err := json.Marshal(getTolerations("CPU", 30))
+	if err != nil {
+		t.Fail()
+	} else {
+		assert.Equal(t, "[{\"key\":\"node.kubernetes.io/not-ready\",\"operator\":\"Exists\",\"effect\":\"NoExecute\",\"tolerationSeconds\":30},{\"key\":\"node.kubernetes.io/unreachable\",\"operator\":\"Exists\",\"effect\":\"NoExecute\",\"tolerationSeconds\":30}]", string(gpuToleration))
 	}
 }

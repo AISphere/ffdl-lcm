@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package learner
 
 import (
-	"github.com/spf13/viper"
 	"github.com/AISphere/ffdl-commons/config"
+	"github.com/spf13/viper"
 	v1core "k8s.io/api/core/v1"
 	v1resource "k8s.io/apimachinery/pkg/api/resource"
 )
@@ -57,7 +57,8 @@ func createPodSpecForTesting() v1core.PodTemplateSpec {
 			Effect:   v1core.TaintEffectNoSchedule,
 		},
 	}
-	return CreatePodSpec([]v1core.Container{learnerContainer}, volumes, labelsMap, map[string]string{}, imagePullSecret, nodeAffinity, gpuToleration)
+	termGracePeriodSecs := int64(0)
+	return CreatePodSpec([]v1core.Container{learnerContainer}, volumes, labelsMap, map[string]string{}, imagePullSecret, nodeAffinity, gpuToleration, termGracePeriodSecs)
 
 }
 
@@ -81,7 +82,8 @@ func createNonSplitPodSpecForTesting() v1core.PodTemplateSpec {
 			Effect:   v1core.TaintEffectNoSchedule,
 		},
 	}
-	return CreatePodSpec([]v1core.Container{learnerContainer}, volumes, labelsMap, map[string]string{}, imagePullSecret, nodeAffinity, gpuToleration)
+	termGracePeriodSecs := int64(0)
+	return CreatePodSpec([]v1core.Container{learnerContainer}, volumes, labelsMap, map[string]string{}, imagePullSecret, nodeAffinity, gpuToleration, termGracePeriodSecs)
 }
 
 func createNonSplitSinglerLearnerContainer() v1core.Container {
@@ -103,5 +105,5 @@ func createNonSplitSinglerLearnerContainer() v1core.Container {
 		Command:      "echo hello",
 	}
 
-	return CreateContainerSpec(container)
+	return CreateContainerSpec(container, "1", "10")
 }

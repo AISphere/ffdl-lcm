@@ -1,13 +1,12 @@
-hash: 7922b0d2dc3fc5dd3e983ff76c415625d316ec061747a94597378d34101218ec
-updated: 2019-02-01T10:57:05.868689-05:00
+hash: 260ff38340b7675f016873caae7aa10f956693d527fd4c3401cbd5eb9b4bd3da
+updated: 2019-02-25T13:30:41.146306-05:00
 imports:
 - name: github.com/AISphere/ffdl-commons
-  version: 0cd170afcd8365e3f8a002993482b75294d8905a
-  repo: https://github.com/sboagibm/ffdl-commons.git
+  version: c641a3cc57cb7cc4eab6e4afe7cf8e7595864417
+  repo: https://github.com/AISphere/ffdl-commons.git
   subpackages:
   - config
   - framework
-  - grpc-health-checker
   - logger
   - metricsmon
   - util
@@ -20,7 +19,7 @@ imports:
 - name: github.com/cenkalti/backoff
   version: 1e4cf3da559842a91afcb6ea6141451e6c30c618
 - name: github.com/coreos/etcd
-  version: 2cf9e51d2a78003b164c2998886158e60ded1cbb
+  version: d57e8b8d97adfc4a6c224fe116714bf1a1f3beb9
   subpackages:
   - auth/authpb
   - clientv3
@@ -105,6 +104,8 @@ imports:
   - json/parser
   - json/scanner
   - json/token
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/json-iterator/go
   version: f2b4162afba35581b6d4a50d3b8f34e33c144682
 - name: github.com/juju/ratelimit
@@ -180,8 +181,12 @@ imports:
 - name: github.com/spf13/viper
   version: 6d33b5a963d922d182c91e8a1c88d81fd150cfd4
 - name: golang.org/x/crypto
-  version: 81e90905daefcd6fd217b62423c0908922eadb30
+  version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
   subpackages:
+  - curve25519
+  - ed25519
+  - ed25519/internal/edwards25519
+  - ssh
   - ssh/terminal
 - name: golang.org/x/net
   version: 66aacef3dd8a676686c7ae3716979581e8b03c47
@@ -253,8 +258,10 @@ imports:
   - tap
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
+- name: gopkg.in/mgo.v2
+  version: 9856a29383ce1c59f308dd1cf0363a79b5bef6b5
 - name: gopkg.in/yaml.v2
-  version: 51d6538a90f86fe93ac480b35f37b2be17fef232
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/api
   version: 11147472b7c934c474a2c484af3c0c5210b7a3af
   subpackages:
@@ -413,6 +420,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: f35b8ab0b5a2cef36673838d662e249dd9c94686
+  version: ffdc059bfe9ce6a4e144ba849dbedead332c6053
   subpackages:
   - assert

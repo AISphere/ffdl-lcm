@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package learner
 
 import (
 	"github.com/AISphere/ffdl-commons/config"
+	"github.com/AISphere/ffdl-lcm/service/lcm/certs"
 	v1core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -27,9 +28,15 @@ type COSVolumeSecret struct {
 	ID, TrainingID, Username, APIKey string
 }
 
+//SSHVolumeSecret ...
+type SSHVolumeSecret struct {
+	ID, TrainingID, Framework, Version string
+}
+
 //Secrets ...
 type Secrets struct {
 	TrainingDataSecret *COSVolumeSecret
+	SSHVolumeSecret    *SSHVolumeSecret
 	ResultsDirSecret   *COSVolumeSecret
 }
 
@@ -45,6 +52,11 @@ func CreateVolumeSecretsSpec(secrets Secrets) []*v1core.Secret {
 	if secrets.ResultsDirSecret != nil {
 		cosResultDirVolumeSecretParams := secrets.ResultsDirSecret
 		secretSpecs = append(secretSpecs, generateCOSVolumeSecret(cosResultDirVolumeSecretParams.ID, cosResultDirVolumeSecretParams.TrainingID, cosResultDirVolumeSecretParams.Username, cosResultDirVolumeSecretParams.APIKey))
+	}
+
+	if secrets.SSHVolumeSecret != nil {
+		sshVolumeSecretParams := secrets.SSHVolumeSecret
+		secretSpecs = append(secretSpecs, generateSSHVolumeSecret(sshVolumeSecretParams.ID, sshVolumeSecretParams.TrainingID, sshVolumeSecretParams.Framework, sshVolumeSecretParams.Version))
 	}
 
 	return secretSpecs
@@ -66,4 +78,10 @@ func generateCOSVolumeSecret(id, trainingID, username, apikey string) *v1core.Se
 	}
 
 	return &spec
+}
+
+func generateSSHVolumeSecret(id, trainingID, framework, version string) *v1core.Secret {
+	sshSecret, _ := certs.GenerateSSHCertAsK8sSecret(id, trainingID, framework, version)
+	//FIXME error handling
+	return sshSecret
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package lcm
 
@@ -51,48 +50,49 @@ const (
 )
 
 const (
-	psPort             int32  = 50051
+	psPort int32 = 50051
 	//caffeFrameworkName string = "caffe"
 	//tfFrameworkName    string = "tensorflow"
 	//torchFrameworkName string = "torch"
 
-	caffeFrameworkName           string = "caffe"
-	tfFrameworkName              string = "tensorflow"
-	torchFrameworkName           string = "torch"
-	caffe2FrameworkName          string = "caffe2"
-	pytorchFrameworkName         string = "pytorch"
-	customFrameworkName          string = "custom"
-	h2o3FrameworkName            string = "h2o3"
-	horovodFrameworkName         string = "horovod"
-	pytorchMPIFrameworkName      string = "pytorchmpi"
+	caffeFrameworkName      string = "caffe"
+	tfFrameworkName         string = "tensorflow"
+	torchFrameworkName      string = "torch"
+	caffe2FrameworkName     string = "caffe2"
+	pytorchFrameworkName    string = "pytorch"
+	customFrameworkName     string = "custom"
+	h2o3FrameworkName       string = "h2o3"
+	horovodFrameworkName    string = "horovod"
+	pytorchMPIFrameworkName string = "pytorchmpi"
 
-	numRetries                = 5
-	maxGPUsPerNode            = 4
+	numRetries     = 5
+	maxGPUsPerNode = 4
 
 	// Not sure if these should stay or go, -sb 3/15/2018
-	errCodeNormal                       = "000"
-	errCodeInsufficientResources        = "100"
-	errCodeFailedDeploy                 = "101"
-	errCodeFailedPS                     = "102" // TODO: unused?
-	errCodeImagePull                    = "103"
-	errFailedPodReasonUnknown           = "104"
-	errCodeK8SConnection                = "200"
-	errCodeEtcdConnection               = "201"
+	errCodeNormal                = "000"
+	errCodeInsufficientResources = "100"
+	errCodeFailedDeploy          = "101"
+	errCodeFailedPS              = "102" // TODO: unused?
+	errCodeImagePull             = "103"
+	errFailedPodReasonUnknown    = "104"
+	errCodeK8SConnection         = "200"
+	errCodeEtcdConnection        = "201"
 )
 
 const (
 	//Total CPU for helpers = 2.5
 	//Total RAM for helpers = 4 GB
-	storeResultsMilliCPU=100
-	storeResultsMemInMB=500
-	loadModelMilliCPU=100
-	loadModelMemInMB=500
-	loadTrainingDataMilliCPU=100
-	loadTrainingDataMemInMB=500
-	logCollectorMilliCPU=100
-	logCollectorMemInMB=500
-	controllerMilliCPU=100
-	controllerMemInMB=500
+	// These are different from FfDL vs. DLaaS.  Need to get these value from Viper config, I think.  -sb Feb 13, 2019
+	storeResultsMilliCPU     = 100
+	storeResultsMemInMB      = 500
+	loadModelMilliCPU        = 100
+	loadModelMemInMB         = 500
+	loadTrainingDataMilliCPU = 100
+	loadTrainingDataMemInMB  = 500
+	logCollectorMilliCPU     = 100
+	logCollectorMemInMB      = 500
+	controllerMilliCPU       = 100
+	controllerMemInMB        = 500
 )
 
 const (

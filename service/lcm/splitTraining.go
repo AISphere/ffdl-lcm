@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,9 @@
 package lcm
 
 import (
-	"github.com/cenkalti/backoff"
 	"github.com/AISphere/ffdl-commons/config"
+	"github.com/cenkalti/backoff"
 
-	//"github.com/AISphere/ffdl-commons/metricsmon"
 	"time"
 
 	"github.com/AISphere/ffdl-lcm/service/lcm/helper"
@@ -43,6 +42,7 @@ func (t splitTraining) Start() error {
 
 	return t.CreateFromBOM(&splitTrainingBOM{
 		t.learner.secrets,
+		t.learner.networkingPolicy,
 		serviceSpec,
 		t.helper.sharedVolumeClaim,
 		statefulSpec,
@@ -51,14 +51,13 @@ func (t splitTraining) Start() error {
 	})
 }
 
-///-------
 func (t splitTraining) deploymentSpecForHelper() *v1beta1.Deployment {
 
 	helperDefn := t.helper
-	helperContainers := t.constructAuxillaryContainers()
+	helperContainers := t.constructAuxillaryContainers(true)
 
 	labelsMap := map[string]string{"training_id": t.req.TrainingId, "user_id": t.req.UserId, "deploy_zone": t.req.Labels["deploy_zone"], "PVC": helperDefn.sharedVolume.PersistentVolumeClaim.ClaimName, "framework": t.req.Framework + t.req.Version, "gpu_type": t.req.Resources.GpuType}
-	podSpec := helper.CreatePodSpec(helperContainers, []v1core.Volume{helperDefn.etcdVolume, helperDefn.sharedVolume}, labelsMap)
+	podSpec := helper.CreatePodSpec(helperContainers, []v1core.Volume{helperDefn.etcdVolume, helperDefn.sslCertsVolume, helperDefn.sharedVolume}, labelsMap)
 	deploymentSpec := helper.CreateDeploymentForHelper(helperDefn.name, podSpec)
 	return deploymentSpec
 
@@ -73,7 +72,7 @@ func (t splitTraining) statefulSetSpecForLearner(serviceName string) (*v1beta1.S
 	}
 	learnerDefn := t.learner
 	helperDefn := t.helper
-
+	useLogCollector := useLogCollectors(t.k8sClient, t.logr)
 	helperAndLearnerVolumes := append(learnerDefn.volumes, helperDefn.sharedVolume)
 
 	imagePullSecret, err := learner.GenerateImagePullSecret(t.k8sClient, t.req)
@@ -82,19 +81,28 @@ func (t splitTraining) statefulSetSpecForLearner(serviceName string) (*v1beta1.S
 	}
 
 	//now create the learner container
-	learnerContainer := constructLearnerContainer(t.req, learnerDefn.envVars, learnerDefn.volumeMounts,
-		helperDefn.sharedVolumeMount, learnerDefn.mountTrainingDataStoreInLearner,
-		learnerDefn.mountResultsStoreInLearner, t.logr) // nil for mounting shared NFS volume since non split mode
-	labelsMap := map[string]string{"training_id": t.req.TrainingId, "user_id": t.req.UserId, "deploy_zone": t.req.Labels["deploy_zone"], "PVC": helperDefn.sharedVolume.PersistentVolumeClaim.ClaimName, "framework": t.req.Framework + t.req.Version}
+	learnerContainer := constructLearnerContainer(t.req, learnerDefn.envVars, learnerDefn.volumeMounts, helperDefn.sharedVolumeMount, learnerDefn.mountTrainingDataStoreInLearner, learnerDefn.mountResultsStoreInLearner, learnerDefn.mountSSHCertsInLearner, t.logr, useLogCollector) // nil for mounting shared NFS volume since non split mode
+	labelsMap := map[string]string{
+		"training_id": t.req.TrainingId,
+		"user_id":     t.req.UserId,
+		"deploy_zone": t.req.Labels["deploy_zone"],
+		"PVC":         helperDefn.sharedVolume.PersistentVolumeClaim.ClaimName,
+		"framework":   t.req.Framework + t.req.Version,
+		"gpu_type":    t.req.Resources.GpuType,
+		"kube_major":  t.req.Labels["kube_major"],
+		"kube_minor":  t.req.Labels["kube_minor"],
+		"cluster_env": t.req.Labels["cluster_env"],
+	}
 	nodeAffinity := &v1core.NodeAffinity{}
 	if z, hasZone := labelsMap["deploy_zone"]; hasZone && z != "" {
 		nodeAffinity = getNodeAffinity(labelsMap)
 	}
-	gpuTolerations := getGpuToleration(t.req.Resources.GpuType)
+	gpuTolerations := getTolerations(t.req.Resources.GpuType, 30)
+	termGracePeriodSecs := getTermGracePeriodSecs(0)
 	if isCPUOnly(t.req.Resources.GpuType) {
 		gpus["gpu/nvidia"] = "NA"
 	}
-	splitLearnerPodSpec := learner.CreatePodSpec([]v1core.Container{learnerContainer}, helperAndLearnerVolumes, labelsMap, gpus, imagePullSecret, nodeAffinity, gpuTolerations)
+	splitLearnerPodSpec := learner.CreatePodSpec([]v1core.Container{learnerContainer}, helperAndLearnerVolumes, labelsMap, gpus, imagePullSecret, nodeAffinity, gpuTolerations, termGracePeriodSecs)
 	statefulSetSpec := learner.CreateStatefulSetSpecForLearner(learnerDefn.name, serviceName, learnerDefn.numberOfLearners, splitLearnerPodSpec)
 
 	return statefulSetSpec, nil
@@ -106,8 +114,26 @@ func (t *splitTraining) CreateFromBOM(bom *splitTrainingBOM) error {
 
 	namespace := config.GetLearnerNamespace()
 
+	if bom.networkPolicy != nil {
+		logr.Infof("Applying network policy for training")
+		if err := backoff.RetryNotify(func() error {
+			_, err := t.k8sClient.NetworkingV1().NetworkPolicies(namespace).Create(bom.networkPolicy)
+			if k8serrors.IsAlreadyExists(err) {
+				logr.WithError(err).Warnf("network policy %s already exists", bom.networkPolicy.Name)
+				return nil
+			}
+			return err
+		}, k8sInteractionBackoff(), func(err error, window time.Duration) {
+			logr.WithError(err).Errorf("Failed in creating policy %s while deploying for training ", bom.networkPolicy.Name)
+			k8sFailureCounter.With(component, "networkpolicy").Add(1)
+		}); err != nil {
+			return err
+		}
+
+	}
+
 	//create shared volume
-	if bom.sharedVolumeClaimBOM != nil { //if nil then must be static volume claim and does not need to be dynamically bound
+	if bom.sharedVolumeClaimBOM != nil {
 		logr.Infof("Split training with shared volume claim %s not nil, creating shared PVC for training", bom.sharedVolumeClaimBOM.Name)
 		if err := backoff.RetryNotify(func() error {
 			return helper.CreatePVCFromBOM(bom.sharedVolumeClaimBOM, t.k8sClient)

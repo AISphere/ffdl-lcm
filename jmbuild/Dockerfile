@@ -29,14 +29,11 @@ RUN apt-get update \
 ADD build/grpc-health-checker/bin/grpc-health-checker /usr/local/bin/
 RUN chmod +x /usr/local/bin/grpc-health-checker
 
-# Set environment variables.
-ENV ETCD_VERSION=3.3.3
+ADD bin/main /
+RUN chmod 755 /main
 
-# Install etcdctl from repository.
-RUN curl -LOks https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz && \
-    tar zxvf etcd-v${ETCD_VERSION}-linux-amd64.tar.gz && \
-    cp etcd-v${ETCD_VERSION}-linux-amd64/etcdctl /usr/bin/etcdctl && \
-    rm -rf etcd-v* && \
-    chmod +x /usr/bin/etcdctl
+# assign "random" non-root user id
+USER 6342627
 
-ADD src/*.sh /usr/local/bin/
+ENTRYPOINT ["/main"]
+

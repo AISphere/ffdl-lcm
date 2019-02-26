@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,14 +41,6 @@ func PopulateLearnerEnvVariablesAndLabels(existingEnvVars []v1core.EnvVar, train
 	envVars = append(envVars, v1core.EnvVar{Name: "DLAAS_JOB_ID", Value: trainingID})
 	envVars = append(envVars, v1core.EnvVar{Name: "NUM_LEARNERS", Value: strconv.Itoa(numLearners)})
 
-	/*
-	   learner ID is being set as a part of the command
-	   	envVars = append(envVars, v1core.EnvVar{
-	   		Name:      "LEARNER_ID",
-	   		ValueFrom: &v1core.EnvVarSource{FieldRef: &v1core.ObjectFieldSelector{FieldPath: "metadata.name"}},
-	   	})
-	*/
-
 	vars := generateLearnerContainerEnvVars(envVars, trainingID, mountTrainingDataStoreInLearner, mountResultsStoreInLearner)
 	return vars
 
@@ -57,7 +49,6 @@ func PopulateLearnerEnvVariablesAndLabels(existingEnvVars []v1core.EnvVar, train
 //FIXME for now not changing this much and just whitelisting rather than makign the list explicit
 //need to make this function more testable
 func generateLearnerContainerEnvVars(envVars []v1core.EnvVar, trainingID string, mountTrainingDataStoreInLearner, mountResultsStoreInLearner bool) []v1core.EnvVar {
-
 	var whitelisted = map[string]struct{}{
 		"MODEL_DIR":                  {},
 		"DATA_DIR":                   {},
@@ -75,6 +66,17 @@ func generateLearnerContainerEnvVars(envVars []v1core.EnvVar, trainingID string,
 		"LEARNER_NAME_PREFIX":        {},
 		"DOWNWARD_API_POD_NAME":      {},
 		"DOWNWARD_API_POD_NAMESPACE": {},
+		"RESULT_STORE_USERNAME":      {},
+		"RESULT_STORE_APIKEY":        {},
+		"RESULT_STORE_AUTHURL":       {},
+		"RESULT_STORE_OBJECTID":      {},
+	}
+
+	for _, envVar := range envVars {
+		if strings.HasPrefix(envVar.Name, "DATA_DIR_") {
+			var nilStruct struct{}
+			whitelisted[envVar.Name] = nilStruct
+		}
 	}
 
 	// Given a set of environment variables, return the subset that should appear in the learner container.
@@ -97,9 +99,9 @@ func generateLearnerContainerEnvVars(envVars []v1core.EnvVar, trainingID string,
 	var checkpointDir string
 	var resultBucketDir string
 	for _, ev := range filteredVars {
-		if strings.HasSuffix(ev.Name, "_DIR") {
+		if strings.Contains(ev.Name, "_DIR") {
 			var dir string
-			if ev.Name == "DATA_DIR" && mountTrainingDataStoreInLearner {
+			if strings.HasPrefix(ev.Name, "DATA_DIR") && mountTrainingDataStoreInLearner {
 				dir = filepath.Join("/mnt/data", ev.Value)
 			} else if ev.Name == "RESULT_DIR" && mountResultsStoreInLearner {
 				resultBucketDir = filepath.Join("/mnt/results", ev.Value)

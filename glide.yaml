@@ -4,14 +4,7 @@ ignore:
 import:
 - package: github.com/AISphere/ffdl-commons
   version: master
-  repo: https://github.com/sboagibm/ffdl-commons.git
-  subpackages:
-  - config
-  - framework
-  - logger
-  - metricsmon
-  - util
-  - grpc-health-checker
+  repo: https://github.com/AISphere/ffdl-commons.git
 - package: github.com/cenkalti/backoff
   version: ^2.0.0
 - package: github.com/coreos/etcd
@@ -52,7 +45,7 @@ import:
   - health
   - health/grpc_health_v1
 - package: gopkg.in/yaml.v2
-  version: ^2.2.1
+- package: gopkg.in/mgo.v2
 - package: k8s.io/api
   subpackages:
   - apps/v1beta1

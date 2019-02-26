@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package learner
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -44,8 +45,8 @@ func TestContainerWithMountedCOS(t *testing.T) {
 		Command: "echo hello",
 	}
 
-	containerCreated := CreateContainerSpec(container)
-	assert.Equal(t, len(containerCreated.VolumeMounts), 4)
+	containerCreated := CreateContainerSpec(container, "1", "10")
+	assert.Equal(t, 4, len(containerCreated.VolumeMounts))
 
 }
 
@@ -68,7 +69,81 @@ func TestContainerWithNoMountedCOS(t *testing.T) {
 		Command: "echo hello",
 	}
 
-	containerCreated := CreateContainerSpec(container)
-	assert.Equal(t, len(containerCreated.VolumeMounts), 2)
+	containerCreated := CreateContainerSpec(container, "1", "10")
+	assert.Equal(t, 2, len(containerCreated.VolumeMounts))
 
+}
+
+// TODO: Alter these tests when Armada integrates kube 1.10 `nvidia.com/gpu` labels
+//       AND we `glide upgrade k8s.io/client-go
+func TestGenerateResourceRequirementsKubeMinor10(t *testing.T) {
+
+	cpuCount := v1resource.NewMilliQuantity(int64(float64(1)*1000.0), v1resource.DecimalSI)
+	memCount := v1resource.NewQuantity(1024, v1resource.DecimalSI)
+	gpuCount := v1resource.NewQuantity(int64(1), v1resource.DecimalSI)
+
+	expectedRequirements := v1core.ResourceRequirements{
+		Requests: v1core.ResourceList{
+			v1core.ResourceCPU:               *cpuCount,
+			v1core.ResourceMemory:            *memCount,
+			"alpha.kubernetes.io/nvidia-gpu": *gpuCount,
+		},
+		Limits: v1core.ResourceList{
+			v1core.ResourceCPU:               *cpuCount,
+			v1core.ResourceMemory:            *memCount,
+			"alpha.kubernetes.io/nvidia-gpu": *gpuCount,
+		},
+	}
+	actualRequirements := generateResourceRequirements(*cpuCount, *memCount, *gpuCount, "1", "10")
+
+	assert.Equal(t, expectedRequirements, actualRequirements)
+}
+
+func TestGenerateResourceRequirementsKubeMinor11(t *testing.T) {
+
+	cpuCount := v1resource.NewMilliQuantity(int64(float64(1)*1000.0), v1resource.DecimalSI)
+	memCount := v1resource.NewQuantity(1024, v1resource.DecimalSI)
+	gpuCount := v1resource.NewQuantity(int64(1), v1resource.DecimalSI)
+
+	expectedRequirements := v1core.ResourceRequirements{
+		Requests: v1core.ResourceList{
+			v1core.ResourceCPU:    *cpuCount,
+			v1core.ResourceMemory: *memCount,
+			"nvidia.com/gpu":      *gpuCount,
+		},
+		Limits: v1core.ResourceList{
+			v1core.ResourceCPU:    *cpuCount,
+			v1core.ResourceMemory: *memCount,
+			"nvidia.com/gpu":      *gpuCount,
+		},
+	}
+	actualRequirements := generateResourceRequirements(*cpuCount, *memCount, *gpuCount, "1", "11")
+
+	assert.Equal(t, expectedRequirements, actualRequirements)
+}
+
+// END TODO
+
+func TestGenerateResourceRequirementsKubeMinor8Plus(t *testing.T) {
+
+	cpuCount := v1resource.NewMilliQuantity(int64(float64(1)*1000.0), v1resource.DecimalSI)
+	memCount := v1resource.NewQuantity(1024, v1resource.DecimalSI)
+	gpuCount := v1resource.NewQuantity(int64(1), v1resource.DecimalSI)
+
+	expectedRequirements := v1core.ResourceRequirements{
+		Requests: v1core.ResourceList{
+			v1core.ResourceCPU:               *cpuCount,
+			v1core.ResourceMemory:            *memCount,
+			"alpha.kubernetes.io/nvidia-gpu": *gpuCount,
+		},
+		Limits: v1core.ResourceList{
+			v1core.ResourceCPU:               *cpuCount,
+			v1core.ResourceMemory:            *memCount,
+			"alpha.kubernetes.io/nvidia-gpu": *gpuCount,
+		},
+	}
+	// strings.Trim would be called in deployDistributedTrainingJob when the minor label is set
+	actualRequirements := generateResourceRequirements(*cpuCount, *memCount, *gpuCount, "1", strings.Trim("8+", "+"))
+
+	assert.Equal(t, expectedRequirements, actualRequirements)
 }

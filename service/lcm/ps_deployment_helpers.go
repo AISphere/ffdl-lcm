@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package lcm
 
 import (
@@ -24,8 +23,8 @@ import (
 
 	"github.com/AISphere/ffdl-commons/config"
 
-	"github.com/AISphere/ffdl-lcm/service"
 	"github.com/AISphere/ffdl-commons/util"
+	"github.com/AISphere/ffdl-lcm/service"
 
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
@@ -47,7 +46,7 @@ func populatePSEnvVariablesAndLabels(req *service.JobDeploymentRequest, logr *lo
 				SecretKeyRef: &v1core.SecretKeySelector{
 					Key: lookupkey,
 					LocalObjectReference: v1core.LocalObjectReference{
-						Name: "lcm-secrets",
+						Name: config.GetLCMSecret(),
 					},
 				},
 			},
@@ -154,8 +153,7 @@ func definePSDeployment(req *service.JobDeploymentRequest, envVars []v1core.EnvV
 						v1core.Container{
 							Name:  psName,
 							Image: psImage,
-							//Command: []string{"/usr/bin/supervisord"},
-							Env: envVars,
+							Env:   envVars,
 							Ports: []v1core.ContainerPort{
 								v1core.ContainerPort{ContainerPort: int32(psPort), Protocol: v1core.ProtocolTCP},
 							},
@@ -183,7 +181,7 @@ func definePSDeployment(req *service.JobDeploymentRequest, envVars []v1core.EnvV
 						Name: "etcd-ssl-cert-vol",
 						VolumeSource: v1core.VolumeSource{
 							Secret: &v1core.SecretVolumeSource{
-								SecretName: "lcm-secrets",
+								SecretName: config.GetLCMSecret(),
 								Items: []v1core.KeyToPath{
 									v1core.KeyToPath{
 										Key:  "DLAAS_ETCD_CERT",
@@ -210,7 +208,6 @@ func definePSDeployment(req *service.JobDeploymentRequest, envVars []v1core.EnvV
 }
 
 func definePSService(psName string, trainingID string) *v1core.Service {
-	// Define service spec.
 	serviceSpec := &v1core.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",

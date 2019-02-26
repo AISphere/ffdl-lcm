@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-
 package lcm
 
 import (
+	"strings"
 	"time"
+
+	"github.com/AISphere/ffdl-lcm/coord"
 
 	"google.golang.org/grpc"
 
 	"github.com/AISphere/ffdl-commons/config"
 	"github.com/AISphere/ffdl-commons/logger"
 	"github.com/AISphere/ffdl-commons/metricsmon"
-	"github.com/AISphere/ffdl-lcm/service"
-	"github.com/AISphere/ffdl-lcm/coord"
 	"github.com/AISphere/ffdl-lcm/lcmconfig"
-	client "github.com/AISphere/ffdl-lcm/trainer-client"
+	"github.com/AISphere/ffdl-lcm/service"
+	"github.com/AISphere/ffdl-trainer/client"
 	"github.com/AISphere/ffdl-trainer/trainer/grpc_trainer_v2"
 
 	"github.com/cenkalti/backoff"
@@ -41,6 +42,7 @@ import (
 	v1core "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	version "k8s.io/apimachinery/pkg/version"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -66,6 +68,8 @@ type lcmService struct {
 	service.Lifecycle
 	k8sClient  kubernetes.Interface
 	etcdClient coord.Coordinator
+	serverInfo *version.Info
+	clusterEnv string
 }
 
 //NewService is a constructor to initialize LCM
@@ -121,9 +125,21 @@ func newService() (*lcmService, error) {
 		return nil, connectivityErr
 	}
 
+	serverInfo, err := k8sClient.Discovery().ServerVersion()
+	if err != nil {
+		// How can this ever fail? k8sclient likely would have failed above
+		logr.WithError(err).Errorf("Failed to obtain kubernetes server version: %v", serverInfo)
+		lcmRestartCounter.With(reason, "k8s").Add(1)
+		return nil, err
+	}
+	clusterEnv := getClusterEnv(serverInfo.GitVersion, logr) // "icp" or "iks"
+	logr.Infof("version major: %s, version minor: %s", serverInfo.Major, serverInfo.Minor)
+
 	s := &lcmService{
 		k8sClient:  k8sClient,
 		etcdClient: client,
+		serverInfo: serverInfo,
+		clusterEnv: clusterEnv,
 	}
 
 	s.RegisterService = func() {
@@ -185,6 +201,10 @@ func (s *lcmService) deployDistributedTrainingJob(ctx context.Context, req *serv
 	} else {
 		logr.Debugf("Deploying %s to zone %s", req.TrainingId, req.Labels["deploy_zone"])
 	}
+
+	req.Labels["kube_major"] = s.serverInfo.Major
+	req.Labels["kube_minor"] = strings.Trim(s.serverInfo.Minor, "+")
+	req.Labels["cluster_env"] = s.clusterEnv
 
 	numLearners := int(req.GetResources().Learners)
 	useNativeDistribution := false //always use native since we don't support PS anymore
@@ -301,6 +321,12 @@ func (s *lcmService) KillTrainingJob(ctx context.Context, req *service.JobKillRe
 	}
 
 	counter.With(progress, deploymentsDeletedPhaseComplete).Add(1)
+
+	logr.Infof("Deleting network policies for training %s", req.TrainingId)
+	err = s.k8sClient.NetworkingV1().NetworkPolicies(config.GetPodNamespace()).DeleteCollection(backgroundDeleteOpts, metav1.ListOptions{LabelSelector: selector})
+	if err != nil {
+		logr.WithError(err).Errorf("deleting network policies for '%s' failed", req.TrainingId)
+	}
 
 	//After Deleting the application, delete the etcd directory.
 	s.etcdClient.DeleteKeyWithOpts(req.TrainingId, logr, clientv3.WithPrefix())

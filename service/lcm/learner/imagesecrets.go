@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ package learner
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 
-	"github.com/spf13/viper"
 	"github.com/AISphere/ffdl-commons/config"
 	"github.com/AISphere/ffdl-lcm/service"
+	"github.com/spf13/viper"
 	v1core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -49,9 +50,9 @@ func GenerateImagePullSecret(k8sClient kubernetes.Interface, req *service.JobDep
 		}, nil
 	}
 
-	// if no token specified, do not use a pull secret
+	// if no token specified, then use ours
 	if req.ImageLocation.AccessToken == "" {
-		return []v1core.LocalObjectReference{}, nil
+		return []v1core.LocalObjectReference{}, errors.New("Custom image access token is missing")
 	}
 
 	// build a custom secret

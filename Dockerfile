@@ -18,9 +18,15 @@
 FROM ubuntu:16.04
 
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update && apt-get install --yes ca-certificates curl ldnsutils
 
-ADD vendor/github.com/AISphere/ffdl-commons/grpc-health-checker/bin/grpc-health-checker /usr/local/bin/
+ENV pkgDeps='zip curl make wget apparmor libsystemd0 systemd apt-transport-https ca-certificates openssh-client git-core libltdl7 expect software-properties-common protobuf-compiler golang-goprotobuf-dev jq ldnsutils'
+
+# Dependencies
+RUN apt-get update \
+                && apt-get install -y $pkgDeps --no-install-recommends --force-yes \
+                && rm -rf /var/lib/apt/lists/*
+
+ADD build/grpc-health-checker/bin/grpc-health-checker /usr/local/bin/
 RUN chmod +x /usr/local/bin/grpc-health-checker
 
 ADD bin/main /

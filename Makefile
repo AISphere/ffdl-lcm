@@ -24,7 +24,32 @@ include ../ffdl-commons/ffdl-commons.mk
 
 protoc: protoc-trainer                 ## Build gRPC .proto files into vendor directory
 
-install-deps: install-deps-base protoc ## Remove vendor directory, rebuild dependencies
+install-deps: install-deps-base protoc build-health-checker-deps ## Remove vendor directory, rebuild dependencies
+
+glide-update: glide-update-base        ## Run full glide rebuild
+
+# === Health Checker Sub Build ===
+
+build-health-checker-deps: clean-health-checker-builds
+	mkdir build
+	cp -r vendor/github.com/AISphere/ffdl-commons/grpc-health-checker build/
+	cd build/grpc-health-checker && make build-x86-64
+	cp -r build ./controller/build
+	cp -r build ./jmbuild/build
+
+# === Job Monitor Build ===
+
+build-x86-64-jobmonitor:
+	(cd ./jmbuild/ && rm -rf bin && CGO_ENABLED=0 GOOS=linux go build -ldflags "-s" -a -installsuffix cgo -o bin/main)
+
+docker-build-jobmonitor: install-deps-if-needed
+	make build-x86-64-jobmonitor
+	(cd ./jmbuild/ && docker build --label git-commit=$(shell git rev-list -1 HEAD) -t "$(DOCKER_HOST_NAME)/$(DOCKER_NAMESPACE)/jobmonitor:$(DLAAS_IMAGE_TAG)" .)
+
+docker-push-jobmonitor:
+	docker push "$(DOCKER_HOST_NAME)/$(DOCKER_NAMESPACE)/jobmonitor:$(DLAAS_IMAGE_TAG)"
+
+# === Controller Build ===
 
 docker-build-controller:  ## Build controller image
 	(cd controller && DOCKER_IMG_NAME="controller" make docker-build)
@@ -32,11 +57,21 @@ docker-build-controller:  ## Build controller image
 docker-push-controller:  ## Push controller docker image to a docker hub
 	(cd controller && DOCKER_IMG_NAME="controller" make docker-push)
 
-docker-build: docker-build-base docker-build-controller        ## Install dependencies if vendor folder is missing, build go code, build docker images (includes controller).
+# === Service Build ===
 
-docker-push: docker-push-base docker-push-controller           ## Push docker image to a docker hub
+docker-build: docker-build-base docker-build-controller docker-build-jobmonitor     ## Install dependencies if vendor folder is missing, build go code, build docker images (includes controller).
 
-clean: clean-base                      ## clean all build artifacts
-	if [ -d ./cmd/lcm/bin ]; then rm -r ./cmd/lcm/bin; fi
+docker-push: docker-push-base docker-push-controller docker-push-jobmonitor         ## Push docker image to a docker hub
+
+clean-health-checker-builds:
+	rm -rf ./build
+	rm -rf ./controller/build
+	rm -rf ./jmbuild/build
+
+clean-helper-bins:
+	rm -rf ./bin
+	rm -r ./jmbuild/bin
+
+clean: clean-base clean-health-checker-builds clean-helper-bin                  ## clean all build artifacts
 
 .PHONY: all clean doctor usage showvars test-unit

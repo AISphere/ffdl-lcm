@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# Copyright 2018 IBM Corporation
+# Copyright 2017-2018 IBM Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,12 +16,6 @@
 # limitations under the License.
 #
 
-# Expected inputs:
-#   JOB_STATE_DIR env var: directory where job state files are stored.
-#   JOB_LEARNER_ZNODE_PATH env var: base path to the learner znode
-#   JOB_LEARNER_ZNODE_STATUS_PATH env var: base path to status of the learner node
-#   JOB_BASE_PATH: base path of the job, used for halting
-#
 #   $1 arg: the ZNode path.
 
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

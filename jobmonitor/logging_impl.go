@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-package client
+package jobmonitor
 
-// JobStatusClient is a client interface for updating the status of training jobs
-type JobStatusClient interface {
-	UpdateJobStatus()
-}
+import (
+	"github.com/AISphere/ffdl-commons/logger"
+	log "github.com/sirupsen/logrus"
+)
 
-// jobStatusClientRPC implements job status updates by calling the gRPC methods of the trainer service
-type jobStatusClientRPC struct {
-	
-}
-
-// NewTrainerClient ...
-func NewTrainerClient() JobStatusClient {
-	return &jobStatusClientRPC{}
-}
-
-
-func (*jobStatusClientRPC) UpdateJobStatus() {
-	// TODO
+//InitLogger ... initializes new logger with trainingID and userID
+func InitLogger(trainingID string, userID string) *log.Entry {
+	data := logger.NewDlaaSLogData(logger.LogkeyLcmService)
+	data[logger.LogkeyTrainingID] = trainingID
+	data[logger.LogkeyUserID] = userID
+	return &log.Entry{Logger: log.StandardLogger(), Data: data}
 }

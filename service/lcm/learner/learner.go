@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import (
 )
 
 //CreatePodSpec ...
-func CreatePodSpec(containers []v1core.Container, volumes []v1core.Volume, labels map[string]string, nodeSelector map[string]string, imagePullSecret []v1core.LocalObjectReference, nodeAffinity *v1core.NodeAffinity, gpuToleration []v1core.Toleration) v1core.PodTemplateSpec {
+func CreatePodSpec(containers []v1core.Container, volumes []v1core.Volume, labels map[string]string, nodeSelector map[string]string, imagePullSecret []v1core.LocalObjectReference, nodeAffinity *v1core.NodeAffinity, gpuToleration []v1core.Toleration, termGracePeriodSecs int64) v1core.PodTemplateSpec {
 	labels["service"] = "dlaas-learner" //label that denies ingress/egress
 	automountSeviceToken := false
 	return v1core.PodTemplateSpec{
@@ -35,12 +35,13 @@ func CreatePodSpec(containers []v1core.Container, volumes []v1core.Volume, label
 			},
 		},
 		Spec: v1core.PodSpec{
-			Containers:                   containers,
-			Volumes:                      volumes,
-			ImagePullSecrets:             imagePullSecret,
-			Tolerations:                  gpuToleration,
-			NodeSelector:                 nodeSelector,
-			AutomountServiceAccountToken: &automountSeviceToken,
+			Containers:                    containers,
+			Volumes:                       volumes,
+			ImagePullSecrets:              imagePullSecret,
+			TerminationGracePeriodSeconds: &termGracePeriodSecs,
+			Tolerations:                   gpuToleration,
+			NodeSelector:                  nodeSelector,
+			AutomountServiceAccountToken:  &automountSeviceToken,
 			Affinity: &v1core.Affinity{
 				NodeAffinity: nodeAffinity,
 			},
@@ -64,7 +65,6 @@ func CreateStatefulSetSpecForLearner(name, servicename string, replicas int, pod
 			Replicas:             &replicaCount,
 			Template:             podTemplateSpec,
 			RevisionHistoryLimit: &revisionHistoryLimit, //we never rollback these
-			//PodManagementPolicy: v1beta1.ParallelPodManagement, //using parallel pod management in stateful sets to ignore the order. not sure if this will affect the helper pod since any pod in learner can come up now
 		},
 	}
 }

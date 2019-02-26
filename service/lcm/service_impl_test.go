@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-
 package lcm
 
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/AISphere/ffdl-commons/config"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/AISphere/ffdl-lcm/service"
-	// "github.com/coreos/etcd/clientv3"
-	// "github.com/AISphere/ffdl-lcm/coord"
 )
 
 func init() {

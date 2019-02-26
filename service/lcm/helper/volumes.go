@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package helper
 
 import (
+	"fmt"
+	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/AISphere/ffdl-commons/config"
@@ -64,6 +66,16 @@ func CreatePVCFromBOM(sharedVolumeClaim *v1core.PersistentVolumeClaim, k8sClient
 }
 
 //CreateETCDVolume ...
+func (volumes Volumes) CreateSSLVolume() v1core.Volume {
+	return createSSLVolume(volumes.ETCDVolume.Name)
+}
+
+//CreateETCDVolumeMount ...
+func (volumes Volumes) CreateSSLVolumeMount() v1core.VolumeMount {
+	return createSSLVolumeMount(volumes.ETCDVolume.Name)
+}
+
+//CreateETCDVolume ...
 func (volumes Volumes) CreateETCDVolume() v1core.Volume {
 	return createETCDVolume(volumes.ETCDVolume.Name)
 }
@@ -74,10 +86,13 @@ func (volumes Volumes) CreateETCDVolumeMount() v1core.VolumeMount {
 }
 
 //CreateDataVolume ...
-func (volumes Volumes) CreateDataVolume() v1core.Volume {
+func (volumes Volumes) CreateDataVolume(trainingID string) v1core.Volume {
 
 	if volumes.SharedNonSplitLearnerHelperVolume != nil {
 		//local volume is required since operating in non split mode
+		if viper.GetBool(config.LcmFluentdEmetricsEnable) {
+			return hostDirJobVolume(volumes.SharedNonSplitLearnerHelperVolume.Name, trainingID)
+		}
 		return localEmptyDirVolume(volumes.SharedNonSplitLearnerHelperVolume.Name)
 	}
 
@@ -102,6 +117,26 @@ func (volumes Volumes) DynamicPVCReference() *v1core.PersistentVolumeClaim {
 
 }
 
+func createSSLVolumeMount(name string) v1core.VolumeMount {
+	return v1core.VolumeMount{
+		Name:      "ssl-certificates",
+		MountPath: "/etc/ssl/dlaas/",
+		ReadOnly:  true,
+	}
+}
+
+func createSSLVolume(name string) v1core.Volume {
+	// Volume with etcd certificates.
+	return v1core.Volume{
+		Name: "ssl-certificates",
+		VolumeSource: v1core.VolumeSource{
+			Secret: &v1core.SecretVolumeSource{
+				SecretName: config.GetSSLSecret(),
+			},
+		},
+	}
+}
+
 func createETCDVolumeMount(name string) v1core.VolumeMount {
 	return v1core.VolumeMount{
 		Name:      name,
@@ -116,7 +151,7 @@ func createETCDVolume(name string) v1core.Volume {
 		Name: name,
 		VolumeSource: v1core.VolumeSource{
 			Secret: &v1core.SecretVolumeSource{
-				SecretName: "lcm-secrets",
+				SecretName: config.GetLCMSecret(),
 				Items: []v1core.KeyToPath{
 					v1core.KeyToPath{
 						Key:  "DLAAS_ETCD_CERT",
@@ -132,6 +167,20 @@ func localEmptyDirVolume(name string) v1core.Volume {
 	return v1core.Volume{
 		Name:         name,
 		VolumeSource: v1core.VolumeSource{EmptyDir: &v1core.EmptyDirVolumeSource{}},
+	}
+}
+
+func hostDirJobVolume(name string, trainingID string) v1core.Volume {
+	path := fmt.Sprintf("/dlaasjobs/%s", trainingID)
+	var hostDirName v1core.HostPathType = v1core.HostPathDirectoryOrCreate
+	return v1core.Volume{
+		Name: name,
+		VolumeSource: v1core.VolumeSource{
+			HostPath: &v1core.HostPathVolumeSource{
+				Path: path,
+				Type: &hostDirName,
+			},
+		},
 	}
 }
 

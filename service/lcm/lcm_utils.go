@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package lcm
 
 import (
@@ -22,6 +21,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff"
@@ -30,9 +30,9 @@ import (
 	"github.com/AISphere/ffdl-commons/config"
 
 	"github.com/AISphere/ffdl-commons/logger"
-	"github.com/AISphere/ffdl-lcm/service"
 	"github.com/AISphere/ffdl-commons/util"
 	"github.com/AISphere/ffdl-lcm/coord"
+	"github.com/AISphere/ffdl-lcm/service"
 
 	client "github.com/AISphere/ffdl-lcm/trainer-client"
 	"github.com/AISphere/ffdl-trainer/trainer/grpc_trainer_v2"
@@ -166,7 +166,6 @@ func handleDeploymentFailure(s *lcmService, dlaasJobName string, tID string,
 	userID string, component string, logr *logger.LocLoggingEntry) {
 
 	logr.Errorf("updating status to FAILED")
-	// Calling updateJobStatus(...) puts a runtime dependedency on the Trainer microservice.  How to fix this?
 	if errUpd := updateJobStatus(tID, grpc_trainer_v2.Status_FAILED, userID, service.StatusMessages_INTERNAL_ERROR.String(), client.ErrCodeFailedDeploy, logr); errUpd != nil {
 		logr.WithError(errUpd).Errorf("after failed %s, error while calling Trainer service client update", component)
 	}
@@ -312,4 +311,16 @@ func isSplitMode(zone string, logr *logger.LocLoggingEntry) bool {
 	staticVolumeName := getStaticVolume(zone, logr)
 	useSplitLearner := len(staticVolumeName) > 0
 	return useSplitLearner
+}
+
+// Armada/IKS clusters will look like GitVersion:"v1.8.15+IKS"
+// ICP clusters will look like GitVersion:"v1.11.1+icp-ee"
+func getClusterEnv(gitVersion string, logr *logger.LocLoggingEntry) string {
+	if strings.Contains(strings.ToLower(gitVersion), "icp") {
+		logr.Infof("server version is: %s", gitVersion)
+		return "icp"
+	}
+
+	logr.Infof("defaulting to Armada/IKS, server version: %s", gitVersion)
+	return "iks"
 }

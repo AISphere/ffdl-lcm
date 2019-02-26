@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. IBM Corporation
+ * Copyright 2017-2018 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package learner
 
 import (
+	"strconv"
+
 	"github.com/AISphere/ffdl-lcm/lcmconfig"
 
 	v1core "k8s.io/api/core/v1"
@@ -38,9 +40,9 @@ type Resources struct {
 }
 
 //CreateContainerSpec ...
-func CreateContainerSpec(container Container) v1core.Container {
+func CreateContainerSpec(container Container, major string, minor string) v1core.Container {
 	image := GetLearnerImageForFramework(container.Image)
-	resources := generateResourceRequirements(container.CPUs, container.Memory, container.GPUs)
+	resources := generateResourceRequirements(container.CPUs, container.Memory, container.GPUs, major, minor)
 	mounts := container.VolumeMounts
 	return generateContainerSpec(container.Name, image, container.Command, container.EnvVars, resources, mounts)
 }
@@ -86,18 +88,39 @@ func generateContainerSpec(name, image, cmd string, vars []v1core.EnvVar, resour
 	}
 }
 
-func generateResourceRequirements(cpus, memory, gpus v1resource.Quantity) v1core.ResourceRequirements {
+func generateResourceRequirements(cpus, memory, gpus v1resource.Quantity, major string, minor string) v1core.ResourceRequirements {
+	// If server version couldn't be found, major and minor be empty strings
+	majorInt, majorErr := strconv.Atoi(major)
+	minorInt, minorErr := strconv.Atoi(minor)
 
+	if majorErr == nil && minorErr == nil {
+		if majorInt == 1 && minorInt <= 10 {
+			return v1core.ResourceRequirements{
+				Requests: v1core.ResourceList{
+					v1core.ResourceCPU:               cpus,
+					v1core.ResourceMemory:            memory,
+					"alpha.kubernetes.io/nvidia-gpu": gpus,
+				},
+				Limits: v1core.ResourceList{
+					v1core.ResourceCPU:               cpus,
+					v1core.ResourceMemory:            memory,
+					"alpha.kubernetes.io/nvidia-gpu": gpus,
+				},
+			}
+		}
+	}
+
+	// Default to assume that that Kube >1.10, use new labels
 	return v1core.ResourceRequirements{
 		Requests: v1core.ResourceList{
-			v1core.ResourceCPU:       cpus,
-			v1core.ResourceMemory:    memory,
-			v1core.ResourceNvidiaGPU: gpus,
+			v1core.ResourceCPU:    cpus,
+			v1core.ResourceMemory: memory,
+			"nvidia.com/gpu":      gpus,
 		},
 		Limits: v1core.ResourceList{
-			v1core.ResourceCPU:       cpus,
-			v1core.ResourceMemory:    memory,
-			v1core.ResourceNvidiaGPU: gpus,
+			v1core.ResourceCPU:    cpus,
+			v1core.ResourceMemory: memory,
+			"nvidia.com/gpu":      gpus,
 		},
 	}
 }
