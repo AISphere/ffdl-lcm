@@ -379,11 +379,7 @@ func (t *training) constructAuxillaryContainers(isSplit bool) []v1core.Container
 	}
 	if useLogCollectors(t.k8sClient, t.logr) {
 		var sslCertsVolumeMount *v1core.VolumeMount = nil
-		if !isSplit {
-			// If non-split mode, the log-collector will be in the same pod as the learner, and should be using
-			// fluentd, and no tds service, thus, it shouldn't need the certs.
-			sslCertsVolumeMount = &helperDefn.sslCertsVolumeMount
-		}
+		sslCertsVolumeMount = &helperDefn.sslCertsVolumeMount
 		helperContainers = append(helperContainers,
 			constructLogCollector(
 				sslCertsVolumeMount,
